@@ -14,23 +14,9 @@ public class User extends Entity {
     private String chatName;
     private String userLink;
 
-    public User createSingleUser(long chatId, String name, String link) {
-        return new User(chatId, "private", name, link);
-    }
-
-    public User createChatUser(long chatId, ChatType chatType, String chatName) {
-        return new User(chatId, chatType.type, chatName, null);
-    }
-
-    public enum ChatType {
-        GROUP("group"),
-        SUPERGROUP("supergroup"),
-        CHANNEL("channel");
-
-        ChatType(String type) {
-            this.type = type;
-        }
-
-        private final String type;
+    public User(long chatId, String chatType, String chatName) {
+        this.chatId = chatId;
+        this.chatType = chatType;
+        this.chatName = chatName;
     }
 }

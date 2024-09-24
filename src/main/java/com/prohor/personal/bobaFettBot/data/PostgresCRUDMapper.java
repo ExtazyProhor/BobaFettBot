@@ -7,7 +7,7 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
-public class PostgresMapper {
+public class PostgresCRUDMapper {
     public static boolean contains(Connection connection, Class<? extends Entity> clazz, Object primaryKey)
             throws SQLException {
 
@@ -97,7 +97,7 @@ public class PostgresMapper {
                 }
                 if (value == null)
                     continue;
-                map.put(entityField.n(), wrapObject(value));
+                map.put(entityField.name(), wrapObject(value));
             }
             if (map.size() == 0)
                 throw new MappingException("entity " + entity + " has no writable fields");
@@ -138,7 +138,7 @@ public class PostgresMapper {
                     Object entityFieldValue = field.get(entity);
                     Object existingFieldValue = field.get(existing);
                     if (existingFieldValue != null && !existingFieldValue.equals(entityFieldValue))
-                        map.put(entityField.n(), wrapObject(entityFieldValue));
+                        map.put(entityField.name(), wrapObject(entityFieldValue));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -167,7 +167,7 @@ public class PostgresMapper {
             EntityField entityField = field.getAnnotation(EntityField.class);
             if (entityField == null)
                 throw new MappingException("primary key field must be annotated with " + EntityField.class);
-            return Objects.requireNonNull(entityField.n(), "field " + field.getName() + " name is null in " + clazz);
+            return Objects.requireNonNull(entityField.name(), "field " + field.getName() + " name is null in " + clazz);
         }
         throw new MappingException("class " + EntityField.class + " does not contain a primary key");
     }
@@ -229,7 +229,7 @@ public class PostgresMapper {
                 continue;
 
             try {
-                field.set(entity, resultSet.getObject(entityField.n(), field.getType()));
+                field.set(entity, resultSet.getObject(entityField.name(), field.getType()));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

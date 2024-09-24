@@ -5,12 +5,13 @@ import com.prohor.personal.bobaFettBot.data.DataStorage;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 
 public class Bot extends TelegramLongPollingBot {
-    protected final BotService<String, BotCommand> commandService;
-    protected final BotPrefixService<BotCallback> callbackService;
+    public final BotService<String, BotCommand> commandService;
+    private final BotPrefixService<BotCallback> callbackService;
 
     public final DataStorage storage;
 
@@ -71,7 +72,8 @@ public class Bot extends TelegramLongPollingBot {
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
 
         if (newChatMember instanceof ChatMemberLeft || newChatMember instanceof ChatMemberBanned)
-            storage.delete(User.class, chatId);
+            if (storage.contains(User.class, chatId))
+                storage.delete(User.class, chatId);
         if (!update.getMyChatMember().getChat().isChannelChat())
             return;
         if (!(newChatMember instanceof ChatMemberAdministrator chatMemberAdministrator))
@@ -80,6 +82,8 @@ public class Bot extends TelegramLongPollingBot {
             return;
         if (storage.contains(User.class, chatId))
             return;
+        Chat chat = update.getMyChatMember().getChat();
+        storage.create(new User(chat.getId(), chat.getType(), chat.getTitle()));
         if (commandService.hasTask("/start"))
             commandService.getTask("/start").executeCommand(update, this);
     }

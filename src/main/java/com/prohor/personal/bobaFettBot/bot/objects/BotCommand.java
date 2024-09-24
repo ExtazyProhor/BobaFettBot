@@ -5,12 +5,18 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 public abstract class BotCommand implements Identifiable<String> {
     private final String command;
+    private final String description;
 
-    public BotCommand(String command) {
+    public BotCommand(String command, String description) {
         this.command = command;
+        this.description = description;
     }
 
     public abstract void executeCommand(Update update, Bot bot) throws Exception;
+
+    public final String getDescription() {
+        return description;
+    }
 
     @Override
     public final String getIdentifier() {

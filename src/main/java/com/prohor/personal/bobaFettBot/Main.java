@@ -1,6 +1,8 @@
 package com.prohor.personal.bobaFettBot;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
+import com.prohor.personal.bobaFettBot.bot.commands.CommandsList;
+import com.prohor.personal.bobaFettBot.bot.commands.StartCommand;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
@@ -46,7 +48,9 @@ public class Main {
             Bot bot = new Bot(
                     botTokens.getString("token"),
                     botTokens.getString("username"),
-                    new BotService<>(),
+                    new BotService<>(
+                            new StartCommand(),
+                            new CommandsList()),
                     new BotPrefixService<>(),
                     new PostgresDataStorage(connectionPool),
                     exceptionWriter);

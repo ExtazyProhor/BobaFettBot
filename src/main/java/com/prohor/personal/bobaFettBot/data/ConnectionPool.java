@@ -36,24 +36,29 @@ public class ConnectionPool {
         return connection;
     }
 
-    public synchronized Connection getConnection() {
-        if (availableConnections.isEmpty())
+    public synchronized Connection getConnection() throws SQLException {
+        if (availableConnections.isEmpty()) {
             try {
                 System.out.println("waiting connection...");
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (availableConnections.isEmpty())
+                return createConnection();
+        }
         return availableConnections.removeFirst();
     }
 
     public synchronized void releaseConnection(Connection connection) throws SQLException {
         if (creationTime.containsKey(connection) &&
-                creationTime.get(connection) + secondsToLive > System.currentTimeMillis() / 1000)
+                creationTime.get(connection) + secondsToLive > System.currentTimeMillis() / 1000 &&
+                availableConnections.size() < maxConnections)
             availableConnections.addLast(connection);
         else {
             connection.close();
-            availableConnections.add(createConnection());
+            if (availableConnections.size() < maxConnections)
+                availableConnections.add(createConnection());
         }
     }
 }
