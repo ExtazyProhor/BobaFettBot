@@ -24,3 +24,6 @@ CREATE TABLE chat_owners (
     chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
     owner_id BIGINT NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE
 );
+
+CREATE INDEX owner_id_index
+ON chat_owners (owner_id);

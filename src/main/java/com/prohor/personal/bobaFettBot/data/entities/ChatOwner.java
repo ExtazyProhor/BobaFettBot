@@ -13,6 +13,6 @@ public class ChatOwner extends Entity {
     @PrimaryKey
     @EntityField(name = "chat_id")
     private long chatId;
-    @EntityField(name = "owner_type")
+    @EntityField(name = "owner_id")
     private long ownerId;
 }
