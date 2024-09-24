@@ -13,14 +13,19 @@ import java.time.*;
 @Table(name = "holidays")
 public class HolidaysSubscriber extends Entity {
     @PrimaryKey
+    @EntityField(name = "chat_id")
     private long chatId;
     @Setter
+    @EntityField(name = "daily_distribution_time")
     private LocalTime dailyDistributionTime;
     @Setter
+    @EntityField(name = "indentation_of_days")
     private short indentationOfDays;
     @Setter
+    @EntityField(name = "subscription_is_active")
     private boolean subscriptionIsActive;
     @Setter
+    @EntityField(name = "can_share_custom_holidays")
     private boolean canShareCustomHolidays;
 
     public HolidaysSubscriber(long chatId, LocalTime time, short indentation) {

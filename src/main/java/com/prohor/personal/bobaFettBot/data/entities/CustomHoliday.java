@@ -13,11 +13,15 @@ import java.time.*;
 @Table(name = "custom_holidays")
 public class CustomHoliday extends Entity {
     @PrimaryKey
+    @EntityField(name = "custom_holiday_id")
     private long customHolidayId;
+    @EntityField(name = "chat_id")
     private long chatId;
     @Setter
+    @EntityField(name = "holiday_date")
     private LocalDate holidayDate;
     @Setter
+    @EntityField(name = "holiday_name")
     private String holidayName;
 
     public CustomHoliday(long chatId, LocalDate holidayDate, String holidayName) {
