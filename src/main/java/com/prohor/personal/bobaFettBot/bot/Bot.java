@@ -2,6 +2,7 @@ package com.prohor.personal.bobaFettBot.bot;
 
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
+import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -70,14 +71,14 @@ public class Bot extends TelegramLongPollingBot {
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
 
         if (newChatMember instanceof ChatMemberLeft || newChatMember instanceof ChatMemberBanned)
-            storage.deleteUser(chatId);
+            storage.delete(User.class, chatId);
         if (!update.getMyChatMember().getChat().isChannelChat())
             return;
         if (!(newChatMember instanceof ChatMemberAdministrator chatMemberAdministrator))
             return;
         if (!chatMemberAdministrator.getCanPostMessages())
             return;
-        if (storage.containsUser(chatId))
+        if (storage.contains(User.class, chatId))
             return;
         if (commandService.hasTask("/start"))
             commandService.getTask("/start").executeCommand(update, this);

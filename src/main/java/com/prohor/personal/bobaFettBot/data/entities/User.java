@@ -1,13 +1,14 @@
 package com.prohor.personal.bobaFettBot.data.entities;
 
+import com.prohor.personal.bobaFettBot.data.mapping.Entity;
 import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
-public class User {
+public class User extends Entity {
     private long chatId;
     private String chatType;
     private String chatName;
