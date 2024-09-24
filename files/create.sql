@@ -19,3 +19,8 @@ CREATE TABLE custom_holidays (
     holiday_date DATE NOT NULL,
     holiday_name VARCHAR(50)
 );
+
+CREATE TABLE chat_owners (
+    chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
+    owner_id BIGINT NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE
+);
