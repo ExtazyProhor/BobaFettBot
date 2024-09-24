@@ -4,13 +4,14 @@ import lombok.*;
 
 import java.time.*;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString
 public class CustomHoliday {
     private long customHolidayId;
-    private final long chatId;
+    private long chatId;
     @Setter
     private LocalDate holidayDate;
     @Setter

@@ -2,15 +2,16 @@ package com.prohor.personal.bobaFettBot.data.entities;
 
 import lombok.*;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString
 public class User {
-    private final long chatId;
-    private final String chatType;
+    private long chatId;
+    private String chatType;
     private String chatName;
-    private final String userLink;
+    private String userLink;
 
     public User createSingleUser(long chatId, String name, String link) {
         return new User(chatId, "private", name, link);

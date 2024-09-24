@@ -4,16 +4,20 @@ import lombok.*;
 
 import java.time.*;
 
+@NoArgsConstructor
 @AllArgsConstructor
-@Setter
 @Getter
 @EqualsAndHashCode
 @ToString
 public class HolidaysSubscriber {
-    private final long chatId;
+    private long chatId;
+    @Setter
     private LocalTime dailyDistributionTime;
+    @Setter
     private short indentationOfDays;
+    @Setter
     private boolean subscriptionIsActive;
+    @Setter
     private boolean canShareCustomHolidays;
 
     public HolidaysSubscriber(long chatId, LocalTime time, short indentation) {
