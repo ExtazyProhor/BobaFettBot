@@ -1,6 +1,6 @@
 package com.prohor.personal.bobaFettBot.data.entities;
 
-import com.prohor.personal.bobaFettBot.data.mapping.Entity;
+import com.prohor.personal.bobaFettBot.data.mapping.*;
 import lombok.*;
 
 @NoArgsConstructor
@@ -8,7 +8,9 @@ import lombok.*;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @ToString
+@Table(name = "users")
 public class User extends Entity {
+    @PrimaryKey
     private long chatId;
     private String chatType;
     private String chatName;

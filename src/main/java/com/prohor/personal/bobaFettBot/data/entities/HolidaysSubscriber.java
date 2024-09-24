@@ -1,6 +1,6 @@
 package com.prohor.personal.bobaFettBot.data.entities;
 
-import com.prohor.personal.bobaFettBot.data.mapping.Entity;
+import com.prohor.personal.bobaFettBot.data.mapping.*;
 import lombok.*;
 
 import java.time.*;
@@ -10,7 +10,9 @@ import java.time.*;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @ToString
+@Table(name = "holidays")
 public class HolidaysSubscriber extends Entity {
+    @PrimaryKey
     private long chatId;
     @Setter
     private LocalTime dailyDistributionTime;

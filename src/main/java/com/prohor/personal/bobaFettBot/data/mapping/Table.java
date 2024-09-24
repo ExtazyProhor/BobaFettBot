@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 public @interface Table {
     String name();
 }
