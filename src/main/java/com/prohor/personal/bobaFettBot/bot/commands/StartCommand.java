@@ -4,8 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCommand;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Chat;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.*;
 
 public class StartCommand extends BotCommand {
     public StartCommand() {
@@ -14,10 +13,7 @@ public class StartCommand extends BotCommand {
 
     @Override
     public void executeCommand(Message message, Bot bot) throws Exception {
-        sendStartMessage(message.getChat(), bot);
-    }
-
-    public static void sendStartMessage(Chat chat, Bot bot) throws Exception {
+        Chat chat = message.getChat();
         long chatId = chat.getId();
         String name = chat.isUserChat() ? chat.getFirstName() : chat.getTitle();
         if (!bot.storage.contains(User.class, chatId))

@@ -1,13 +1,11 @@
 package com.prohor.personal.bobaFettBot.bot;
 
-import com.prohor.personal.bobaFettBot.bot.commands.StartCommand;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Chat;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 
@@ -86,6 +84,6 @@ public class Bot extends TelegramLongPollingBot {
             return;
         Chat chat = update.getMyChatMember().getChat();
         storage.create(new User(chat.getId(), chat.getType(), chat.getTitle()));
-        StartCommand.sendStartMessage(update.getMyChatMember().getChat(), this);
+        // TODO: 24.09.2024 add channel functionality
     }
 }

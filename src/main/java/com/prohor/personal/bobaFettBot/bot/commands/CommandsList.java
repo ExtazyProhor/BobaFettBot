@@ -4,7 +4,6 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class CommandsList extends BotCommand {
     public CommandsList() {
