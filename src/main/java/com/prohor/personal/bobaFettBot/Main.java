@@ -4,6 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
+import com.prohor.personal.bobaFettBot.system.LogWriter;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -24,18 +25,13 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        ExceptionWriter exceptionWriter = null;
-        try {
-            exceptionWriter = System.out::println; // TODO: 22.09.2024 DEBUG EXCEPTION WRITER
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        File directory = path.contains(".jar") ?
+                new File(path).getParentFile() :
+                new File("files/private");
+        ExceptionWriter exceptionWriter = new LogWriter(directory);
 
         try {
-            String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            File directory = path.contains(".jar") ?
-                    new File(path).getParentFile() :
-                    new File("files/private");
             JSONObject tokens = new JSONObject(Files.readString(Paths.get(directory.toURI()).resolve("tokens.json")));
             JSONObject botTokens = tokens.getJSONObject("bot-info");
             JSONObject databaseTokens = tokens.getJSONObject("database-info");
