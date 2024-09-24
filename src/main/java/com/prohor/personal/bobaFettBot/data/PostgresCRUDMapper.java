@@ -199,10 +199,14 @@ public class PostgresCRUDMapper {
     }
 
     private static String wrapObject(Object object) {
-        if (object instanceof String || object instanceof LocalDate || object instanceof LocalTime) {
-            return "'" + object + "'";
+        if (object instanceof String) {
+            return "'" + object.toString().replaceAll("'", "''") + "'";
         } else if (object instanceof Number) {
             return object.toString();
+        } else if (object instanceof LocalDate || object instanceof LocalTime) {
+            return "'" + object + "'";
+        } else if (object instanceof Boolean bool) {
+            return bool ? "TRUE" : "FALSE";
         } else {
             throw new IllegalArgumentException("Unsupported type: " + object.getClass().getName());
         }
