@@ -1,7 +1,7 @@
 package com.prohor.personal.bobaFettBot.bot.objects;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 public abstract class BotCommand implements Identifiable<String> {
     private final String command;
@@ -12,7 +12,7 @@ public abstract class BotCommand implements Identifiable<String> {
         this.description = description;
     }
 
-    public abstract void executeCommand(Update update, Bot bot) throws Exception;
+    public abstract void executeCommand(Message message, Bot bot) throws Exception;
 
     public final String getDescription() {
         return description;

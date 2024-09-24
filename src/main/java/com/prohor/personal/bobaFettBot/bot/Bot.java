@@ -1,11 +1,13 @@
 package com.prohor.personal.bobaFettBot.bot;
 
+import com.prohor.personal.bobaFettBot.bot.commands.StartCommand;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 
@@ -59,12 +61,12 @@ public class Bot extends TelegramLongPollingBot {
             message = message.substring(0, message.indexOf('@'));
         }
         if (commandService.hasTask(message))
-            commandService.getTask(message).executeCommand(update, this);
+            commandService.getTask(message).executeCommand(update.getMessage(), this);
     }
 
     private void hasCallback(Update update) throws Exception {
         if (!callbackService.hasTask(update.getCallbackQuery().getData())) return;
-        commandService.getTask(update.getCallbackQuery().getData()).executeCommand(update, this);
+        callbackService.getTask(update.getCallbackQuery().getData()).callbackReceived(update, this);
     }
 
     private void hasMyChatMember(Update update) throws Exception {
@@ -84,7 +86,6 @@ public class Bot extends TelegramLongPollingBot {
             return;
         Chat chat = update.getMyChatMember().getChat();
         storage.create(new User(chat.getId(), chat.getType(), chat.getTitle()));
-        if (commandService.hasTask("/start"))
-            commandService.getTask("/start").executeCommand(update, this);
+        StartCommand.sendStartMessage(update.getMyChatMember().getChat(), this);
     }
 }
