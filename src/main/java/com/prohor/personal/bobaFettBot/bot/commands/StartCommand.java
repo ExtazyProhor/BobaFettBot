@@ -21,7 +21,7 @@ public class StartCommand extends BotCommand {
                 bot.storage.create(new User(chatId, chat.getType(), name, "@" + chat.getUserName()));
             else
                 bot.storage.create(new User(chatId, chat.getType(), name));
-        bot.execute(SendMessage.builder()
+        bot.sendMessage(SendMessage.builder()
                 .chatId(chatId)
                 .text("Привет, " + name +
                         "! Чтобы узнать что я могу, используй команду /commands или меню слева от поля ввода")

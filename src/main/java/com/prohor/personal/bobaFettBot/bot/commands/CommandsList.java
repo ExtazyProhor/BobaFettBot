@@ -20,7 +20,7 @@ public class CommandsList extends BotCommand {
         }
         if (builder.isEmpty())
             return;
-        bot.execute(SendMessage.builder()
+        bot.sendMessage(SendMessage.builder()
                 .chatId(message.getChatId())
                 .text(builder.toString())
                 .build());

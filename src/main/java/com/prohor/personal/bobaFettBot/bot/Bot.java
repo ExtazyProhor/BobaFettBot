@@ -2,12 +2,15 @@ package com.prohor.personal.bobaFettBot.bot;
 
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
+import com.prohor.personal.bobaFettBot.data.entities.ChatOwner;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Bot extends TelegramLongPollingBot {
     public final BotService<String, BotCommand> commandService;
@@ -50,12 +53,30 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    public final void sendMessage(SendMessage message) throws Exception {
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            String exception = e.getMessage();
+            if (exception.contains("user is deactivated") ||
+                    exception.contains("bot was blocked by the user") ||
+                    exception.contains("group chat was upgraded to a supergroup chat"))
+                storage.delete(User.class, Long.parseLong(message.getChatId()));
+            else
+                throw e;
+        }
+    }
+
     private void hasMessage(Update update) throws Exception {
+        if (update.getMessage().getChat().isChannelChat())
+            return;
         String message = update.getMessage().getText().trim();
-        if (!message.startsWith("/")) return;
+        if (!message.startsWith("/"))
+            return;
         if (message.contains("@")) {
             String username = message.substring(message.indexOf('@') + 1);
-            if (!username.equals(getBotUsername())) return;
+            if (!username.equals(getBotUsername()))
+                return;
             message = message.substring(0, message.indexOf('@'));
         }
         if (commandService.hasTask(message))
@@ -72,8 +93,10 @@ public class Bot extends TelegramLongPollingBot {
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
 
         if (newChatMember instanceof ChatMemberLeft || newChatMember instanceof ChatMemberBanned)
-            if (storage.contains(User.class, chatId))
+            if (storage.contains(User.class, chatId)) {
                 storage.delete(User.class, chatId);
+                return;
+            }
         if (!update.getMyChatMember().getChat().isChannelChat())
             return;
         if (!(newChatMember instanceof ChatMemberAdministrator chatMemberAdministrator))
@@ -84,6 +107,28 @@ public class Bot extends TelegramLongPollingBot {
             return;
         Chat chat = update.getMyChatMember().getChat();
         storage.create(new User(chat.getId(), chat.getType(), chat.getTitle()));
-        // TODO: 24.09.2024 add channel functionality
+
+        boolean sent = true;
+        long ownerId = update.getMyChatMember().getFrom().getId();
+        try {
+            execute(SendMessage.builder()
+                    .chatId(ownerId)
+                    .text("В этом чате вы теперь можете управлять поведением бота в канале \"" + chat.getTitle() +
+                            "\". Для этого используйте команду /my_channels. Чтобы поменять управляющего ботом в " +
+                            "этом канале на другого пользователя, этот пользователь должен добавить бота в канал " +
+                            "сам, после предварительного удаления")
+                    .build());
+        } catch (TelegramApiException e) {
+            sent = false;
+        }
+        if (sent)
+            storage.create(new ChatOwner(chatId, ownerId));
+        else
+            sendMessage(SendMessage.builder()
+                    .chatId(chatId)
+                    .text("Личный чат с пользователем " + update.getMyChatMember().getFrom().getFirstName() +
+                            ", добавившим бота в этот канал недоступен. Настройка невозможна. Начните диалог с " +
+                            "ботом, затем удалите его из канала и добавьте заново")
+                    .build());
     }
 }

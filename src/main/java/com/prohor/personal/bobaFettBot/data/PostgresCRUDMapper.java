@@ -208,7 +208,7 @@ public class PostgresCRUDMapper {
         } else if (object instanceof Boolean bool) {
             return bool ? "TRUE" : "FALSE";
         } else {
-            throw new IllegalArgumentException("Unsupported type: " + object.getClass().getName());
+            throw new MappingException("unsupported type: " + object.getClass());
         }
     }
 
