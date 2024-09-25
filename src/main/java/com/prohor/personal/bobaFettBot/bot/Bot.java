@@ -7,6 +7,8 @@ import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
@@ -57,14 +59,34 @@ public class Bot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            String exception = e.getMessage();
-            if (exception.contains("user is deactivated") ||
-                    exception.contains("bot was blocked by the user") ||
-                    exception.contains("group chat was upgraded to a supergroup chat"))
-                storage.delete(User.class, Long.parseLong(message.getChatId()));
-            else
-                throw e;
+            checkException(e, message.getChatId());
         }
+    }
+
+    public final void editMessageReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) throws Exception {
+        try {
+            execute(editMessageReplyMarkup);
+        } catch (TelegramApiException e) {
+            checkException(e, editMessageReplyMarkup.getChatId());
+        }
+    }
+
+    public final void editMessageText(EditMessageText editMessageText) throws Exception {
+        try {
+            execute(editMessageText);
+        } catch (TelegramApiException e) {
+            checkException(e, editMessageText.getChatId());
+        }
+    }
+
+    private void checkException(TelegramApiException e, String chatId) throws Exception {
+        String exception = e.getMessage();
+        if (exception.contains("user is deactivated") ||
+                exception.contains("bot was blocked by the user") ||
+                exception.contains("group chat was upgraded to a supergroup chat"))
+            storage.delete(User.class, Long.parseLong(chatId));
+        else
+            throw e;
     }
 
     private void hasMessage(Update update) throws Exception {
@@ -85,7 +107,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private void hasCallback(Update update) throws Exception {
         if (!callbackService.hasTask(update.getCallbackQuery().getData())) return;
-        callbackService.getTask(update.getCallbackQuery().getData()).callbackReceived(update, this);
+        callbackService.getTask(update.getCallbackQuery().getData()).callbackReceived(update.getCallbackQuery(), this);
     }
 
     private void hasMyChatMember(Update update) throws Exception {

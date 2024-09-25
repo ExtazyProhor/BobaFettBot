@@ -27,3 +27,8 @@ CREATE TABLE chat_owners (
 
 CREATE INDEX owner_id_index
 ON chat_owners (owner_id);
+
+CREATE TABLE user_statuses (
+    chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
+    status VARCHAR(64) NOT NULL
+);

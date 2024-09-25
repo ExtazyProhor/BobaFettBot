@@ -14,7 +14,7 @@ public class BotPrefixService<Task extends Identifiable<String>> {
 
     public Task getTask(String prefix) {
         for (Task task : list)
-            if (task.getIdentifier().startsWith(prefix))
+            if (prefix.startsWith(task.getIdentifier()))
                 return task;
         return null;
     }
