@@ -79,7 +79,7 @@ public class PostgresCRUDMapper {
         });
         for (SQLException e : sqlExceptions)
             throw e;
-        return list.getFirst();
+        return list.get(0);
     }
 
     @SuppressWarnings("unchecked")
