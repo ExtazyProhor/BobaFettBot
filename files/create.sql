@@ -9,8 +9,7 @@ CREATE TABLE holidays (
     chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
     daily_distribution_time TIME NOT NULL,
     indentation_of_days SMALLINT NOT NULL,
-    subscription_is_active BOOLEAN NOT NULL,
-    can_share_custom_holidays BOOLEAN NOT NULL DEFAULT TRUE
+    subscription_is_active BOOLEAN NOT NULL
 );
 
 CREATE TABLE custom_holidays (

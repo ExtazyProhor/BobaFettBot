@@ -47,7 +47,7 @@ public class WaitCustomHolidayName extends BotStatus {
             return;
         }
         bot.storage.create(new CustomHoliday(chatId, LocalDate.parse(status), customHolidayName));
-        deleteStatus(bot, chatId);
+        BotStatus.deleteStatus(bot, chatId);
         answer.setText("Праздник \"" + customHolidayName + "\" успешно добавлен");
         bot.sendMessage(answer);
     }

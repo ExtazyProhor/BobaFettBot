@@ -24,15 +24,11 @@ public class HolidaysSubscriber implements Entity {
     @Setter
     @EntityField(name = "subscription_is_active")
     private Boolean subscriptionIsActive;
-    @Setter
-    @EntityField(name = "can_share_custom_holidays")
-    private Boolean canShareCustomHolidays;
 
     public HolidaysSubscriber(long chatId, LocalTime time, short indentation) {
         this.chatId = chatId;
         this.dailyDistributionTime = time;
         this.indentationOfDays = indentation;
         this.subscriptionIsActive = true;
-        this.canShareCustomHolidays = true;
     }
 }
