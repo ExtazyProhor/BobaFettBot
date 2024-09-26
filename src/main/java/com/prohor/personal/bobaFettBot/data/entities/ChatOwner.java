@@ -9,10 +9,10 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Table(name = "chat_owners")
-public class ChatOwner extends Entity {
+public class ChatOwner implements Entity {
     @PrimaryKey
     @EntityField(name = "chat_id")
-    private long chatId;
+    private Long chatId;
     @EntityField(name = "owner_id")
-    private long ownerId;
+    private Long ownerId;
 }

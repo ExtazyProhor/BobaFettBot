@@ -1,10 +1,7 @@
 package com.prohor.personal.bobaFettBot;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
-import com.prohor.personal.bobaFettBot.bot.commands.CancelCommand;
-import com.prohor.personal.bobaFettBot.bot.commands.CommandsList;
-import com.prohor.personal.bobaFettBot.bot.commands.GetIdCommand;
-import com.prohor.personal.bobaFettBot.bot.commands.StartCommand;
+import com.prohor.personal.bobaFettBot.bot.commands.*;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
 import com.prohor.personal.bobaFettBot.features.holidays.callbacks.ChooseCustomHolidayDateCallback;
@@ -15,12 +12,10 @@ import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import com.prohor.personal.bobaFettBot.system.LogWriter;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.*;
 import java.nio.file.*;
-import java.sql.SQLException;
 
 public class Main {
     static {

@@ -29,7 +29,8 @@ public class WaitCustomHolidayName extends BotStatus {
             bot.onUpdateReceived(update);
             return;
         }
-        SendMessage answer = SendMessage.builder().chatId(chatId).build();
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId);
         String customHolidayName = update.getMessage().getText();
         if (customHolidayName.equals("/cancel")) {
             answer.setText("Создание собственного праздника отменено");

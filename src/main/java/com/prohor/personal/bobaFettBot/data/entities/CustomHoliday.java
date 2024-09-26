@@ -11,13 +11,13 @@ import java.time.*;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Table(name = "custom_holidays")
-public class CustomHoliday extends Entity {
+public class CustomHoliday implements Entity {
     @PrimaryKey
     @EntityField(name = "custom_holiday_id")
-    private long customHolidayId;
+    private Integer customHolidayId;
     @Setter
     @EntityField(name = "chat_id")
-    private long chatId;
+    private Long chatId;
     @Setter
     @EntityField(name = "holiday_date")
     private LocalDate holidayDate;

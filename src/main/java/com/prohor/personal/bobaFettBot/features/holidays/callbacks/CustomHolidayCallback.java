@@ -34,12 +34,24 @@ public class CustomHolidayCallback extends BotCallback {
                 switch (callback) {
                     case "del-page<" -> deleteCustomHoliday(Integer.parseInt(metadata) - 1, chatId, messageId, bot);
                     case "del-page>" -> deleteCustomHoliday(Integer.parseInt(metadata) + 1, chatId, messageId, bot);
-                    case "del-by-id" -> bot.storage.delete(CustomHoliday.class, Long.parseLong(metadata));
+                    case "del-by-id" -> {
+                        CustomHoliday customHoliday = bot.storage.get(CustomHoliday.class, Long.parseLong(metadata));
+                        bot.storage.delete(CustomHoliday.class, Long.parseLong(metadata));
+                        bot.editMessageText(EditMessageText.builder()
+                                .text("Праздник " + getCustomHolidayDescription(customHoliday) + " удален")
+                                .chatId(chatId)
+                                .messageId(messageId)
+                                .build());
+                    }
                     case "read-page<" -> listCustomHoliday(Integer.parseInt(metadata) - 1, chatId, messageId, bot);
                     case "read-page>" -> listCustomHoliday(Integer.parseInt(metadata) + 1, chatId, messageId, bot);
                 }
             }
         }
+    }
+
+    private static String getCustomHolidayDescription(CustomHoliday holiday) {
+        return getRussianDate(holiday.getHolidayDate()) + " " + holiday.getHolidayName();
     }
 
     private static CustomHolidayCallback instance;
@@ -94,14 +106,16 @@ public class CustomHolidayCallback extends BotCallback {
             if (current >= customHolidays.size())
                 break;
             holiday = customHolidays.get(current);
-            String fullHoliday = getRussianDate(holiday.getHolidayDate()) + " " + holiday.getHolidayName();
+            String fullHoliday = getCustomHolidayDescription(holiday);
             buttonsText.add(List.of(fullHoliday.length() < 60 ? fullHoliday : fullHoliday.substring(0, 60) + "..."));
             buttonsCallback.add(List.of(prefix + "del-by-id" + '.' + holiday.getCustomHolidayId()));
         }
         buttonsText.add(List.of("❌ Отменить удаление ❌"));
         buttonsCallback.add(List.of(prefix + "cancel"));
-        buttonsText.add(List.of("❮", (page + 1) + "/" + (totalPages + 1), "❯"));
-        buttonsCallback.add(List.of(prefix + "del-page<" + '.' + page, "-", prefix + "del-page>" + '.' + page));
+        if (totalPages > 1) {
+            buttonsText.add(List.of("❮", (page + 1) + "/" + totalPages, "❯"));
+            buttonsCallback.add(List.of(prefix + "del-page<" + '.' + page, "-", prefix + "del-page>" + '.' + page));
+        }
 
         bot.editMessageText(EditMessageText.builder()
                 .chatId(chatId)
@@ -132,12 +146,19 @@ public class CustomHolidayCallback extends BotCallback {
             if (current >= customHolidays.size())
                 break;
             holiday = customHolidays.get(current);
-            message.append(getRussianDate(holiday.getHolidayDate())).append(" ")
-                    .append(holiday.getHolidayName()).append("\n");
+            message.append(getCustomHolidayDescription(holiday)).append("\n");
         }
 
+        if (totalPages == 1) {
+            bot.editMessageText(EditMessageText.builder()
+                    .chatId(chatId)
+                    .messageId(messageId)
+                    .text(message.toString())
+                    .build());
+            return;
+        }
         String prefix = getIdentifier();
-        List<List<String>> buttonsText = List.of(List.of("❮", (page + 1) + "/" + (totalPages + 1), "❯"));
+        List<List<String>> buttonsText = List.of(List.of("❮", (page + 1) + "/" + totalPages, "❯"));
         List<List<String>> buttonsCallback = List.of(List.of(
                 prefix + "read-page<" + '.' + page,
                 "-",

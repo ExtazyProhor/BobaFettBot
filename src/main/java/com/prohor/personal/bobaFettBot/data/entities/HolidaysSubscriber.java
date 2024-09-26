@@ -11,22 +11,22 @@ import java.time.*;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Table(name = "holidays")
-public class HolidaysSubscriber extends Entity {
+public class HolidaysSubscriber implements Entity {
     @PrimaryKey
     @EntityField(name = "chat_id")
-    private long chatId;
+    private Long chatId;
     @Setter
     @EntityField(name = "daily_distribution_time")
     private LocalTime dailyDistributionTime;
     @Setter
     @EntityField(name = "indentation_of_days")
-    private short indentationOfDays;
+    private Short indentationOfDays;
     @Setter
     @EntityField(name = "subscription_is_active")
-    private boolean subscriptionIsActive;
+    private Boolean subscriptionIsActive;
     @Setter
     @EntityField(name = "can_share_custom_holidays")
-    private boolean canShareCustomHolidays;
+    private Boolean canShareCustomHolidays;
 
     public HolidaysSubscriber(long chatId, LocalTime time, short indentation) {
         this.chatId = chatId;

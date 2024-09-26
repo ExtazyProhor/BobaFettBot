@@ -51,7 +51,9 @@ public class PostgresCRUDMapper {
                     getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sqlQuery);
-            return createEntityFromResultSet(clazz, resultSet);
+            if (resultSet.next())
+                return createEntityFromResultSet(clazz, resultSet);
+            throw new MappingException("entity with specified primary key does not exist");
         } finally {
             if (statement != null)
                 statement.close();
