@@ -15,6 +15,7 @@ public class CustomHoliday extends Entity {
     @PrimaryKey
     @EntityField(name = "custom_holiday_id")
     private long customHolidayId;
+    @Setter
     @EntityField(name = "chat_id")
     private long chatId;
     @Setter

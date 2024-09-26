@@ -20,6 +20,12 @@ CREATE TABLE custom_holidays (
     holiday_name VARCHAR(50)
 );
 
+CREATE INDEX custom_holiday_chat_id_index
+ON custom_holidays (chat_id);
+
+CREATE INDEX custom_holiday_holiday_date_index
+ON custom_holidays (holiday_date);
+
 CREATE TABLE chat_owners (
     chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
     owner_id BIGINT NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE

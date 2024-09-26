@@ -4,6 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
 import com.prohor.personal.bobaFettBot.data.entities.ChatOwner;
 import com.prohor.personal.bobaFettBot.data.entities.User;
+import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,11 +15,15 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.*;
+
 public class Bot extends TelegramLongPollingBot {
-    public final BotService<String, BotCommand> commandService;
+    private final BotService<String, BotCommand> commandService;
     private final BotPrefixService<BotCallback> callbackService;
+    private final BotPrefixService<BotStatus> statusService;
 
     public final DataStorage storage;
+    public final Set<Long> usersWithStatus;
 
     private final String username;
     private final ExceptionWriter exceptionWriter;
@@ -26,14 +31,19 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(String token, String username,
                BotService<String, BotCommand> commandService,
                BotPrefixService<BotCallback> callbackService,
+               BotPrefixService<BotStatus> statusService,
                DataStorage storage,
-               ExceptionWriter exceptionWriter) {
+               ExceptionWriter exceptionWriter) throws Exception {
         super(token);
         this.username = username;
         this.commandService = commandService;
         this.callbackService = callbackService;
+        this.statusService = statusService;
         this.storage = storage;
         this.exceptionWriter = exceptionWriter;
+
+        this.usersWithStatus = new HashSet<>();
+        this.usersWithStatus.addAll(storage.getAll(UserStatus.class).stream().map(UserStatus::getChatId).toList());
     }
 
     @Override
@@ -44,6 +54,18 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public final void onUpdateReceived(Update update) {
         try {
+            Long chatId = null;
+            if (update.hasMessage())
+                chatId = update.getMessage().getChatId();
+            else if (update.hasCallbackQuery())
+                chatId = update.getCallbackQuery().getMessage().getChatId();
+            if (chatId != null && usersWithStatus.contains(chatId)) {
+                String status = storage.get(UserStatus.class, chatId).getStatus();
+                if (statusService.hasTask(status))
+                    statusService.getTask(status).hasStatus(update, chatId, this);
+                return;
+            }
+
             if (update.hasMessage() && update.getMessage().hasText())
                 hasMessage(update);
             else if (update.hasCallbackQuery())
@@ -60,14 +82,6 @@ public class Bot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             checkException(e, message.getChatId());
-        }
-    }
-
-    public final void editMessageReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) throws Exception {
-        try {
-            execute(editMessageReplyMarkup);
-        } catch (TelegramApiException e) {
-            checkException(e, editMessageReplyMarkup.getChatId());
         }
     }
 
@@ -152,5 +166,9 @@ public class Bot extends TelegramLongPollingBot {
                             ", добавившим бота в этот канал недоступен. Настройка невозможна. Начните диалог с " +
                             "ботом, затем удалите его из канала и добавьте заново")
                     .build());
+    }
+
+    public Collection<BotCommand> getAllCommands() {
+        return commandService.getAllCommands();
     }
 }

@@ -1,11 +1,8 @@
 package com.prohor.personal.bobaFettBot.bot.objects;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-public class BotService<Identifier, Task extends Identifiable<Identifier>> implements Iterable<Task> {
+public class BotService<Identifier, Task extends Identifiable<Identifier>> {
     private final Map<Identifier, Task> map = new HashMap<>();
 
     @SafeVarargs
@@ -21,8 +18,7 @@ public class BotService<Identifier, Task extends Identifiable<Identifier>> imple
         return map.containsKey(identifier);
     }
 
-    @Override
-    public Iterator<Task> iterator() {
-        return map.values().iterator();
+    public Collection<Task> getAllCommands() {
+        return map.values();
     }
 }

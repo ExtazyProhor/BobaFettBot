@@ -6,9 +6,10 @@ import java.lang.reflect.*;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class PostgresCRUDMapper {
-    public static boolean contains(Connection connection, Class<? extends Entity> clazz, Object primaryKey)
+    public static <T extends Entity> boolean contains(Connection connection, Class<T> clazz, Object primaryKey)
             throws SQLException {
 
         Statement statement = null;
@@ -29,7 +30,7 @@ public class PostgresCRUDMapper {
         }
     }
 
-    public static void delete(Connection connection, Class<? extends Entity> clazz, Object primaryKey)
+    public static <T extends Entity> void delete(Connection connection, Class<T> clazz, Object primaryKey)
             throws SQLException {
         try (Statement statement = connection.createStatement()) {
             String sql = "DELETE FROM " + getTableName(clazz) + " WHERE " +
@@ -51,6 +52,82 @@ public class PostgresCRUDMapper {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sqlQuery);
             return createEntityFromResultSet(clazz, resultSet);
+        } finally {
+            if (statement != null)
+                statement.close();
+            if (resultSet != null)
+                resultSet.close();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Entity> T getOneByField(Connection connection, T entity) throws SQLException {
+        List<SQLException> sqlExceptions = new ArrayList<>();
+        List<T> list = new ArrayList<>();
+        getByField(connection, entity, resultSet -> {
+            try {
+                if (resultSet.next())
+                    list.add((T) createEntityFromResultSet(entity.getClass(), resultSet));
+                else
+                    throw new MappingException("there are no entities in database that have a field " +
+                            "with the specified value");
+            } catch (SQLException e) {
+                sqlExceptions.add(e);
+            }
+        });
+        for (SQLException e : sqlExceptions)
+            throw e;
+        return list.getFirst();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Entity> List<T> getAllByField(Connection connection, T entity) throws SQLException {
+        List<SQLException> sqlExceptions = new ArrayList<>();
+        List<T> list = new ArrayList<>();
+        getByField(connection, entity, resultSet -> {
+            try {
+                while (resultSet.next())
+                    list.add((T) createEntityFromResultSet(entity.getClass(), resultSet));
+            } catch (SQLException e) {
+                sqlExceptions.add(e);
+            }
+        });
+        for (SQLException e : sqlExceptions)
+            throw e;
+        return list;
+    }
+
+    private static <T extends Entity> void getByField(Connection connection, T entity, Consumer<ResultSet> consumer)
+            throws SQLException {
+
+        Object value = null;
+        String column = null;
+        for (Field field : entity.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            EntityField entityField = field.getAnnotation(EntityField.class);
+            if (entityField == null)
+                continue;
+            try {
+                value = field.get(entity);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if (value == null)
+                continue;
+            column = entityField.name();
+            break;
+        }
+        if (column == null)
+            throw new MappingException("entity hasn't not null fields");
+
+        Statement statement = null;
+        ResultSet resultSet = null;
+        try {
+            String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + " WHERE " + column + " = " +
+                    wrapObject(value) + ";";
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(sqlQuery);
+            consumer.accept(resultSet);
         } finally {
             if (statement != null)
                 statement.close();
@@ -81,7 +158,23 @@ public class PostgresCRUDMapper {
         }
     }
 
-    public static void create(Connection connection, Entity entity) throws SQLException {
+    public static <T extends Entity> int countByField(Connection connection, T entity) throws SQLException {
+        List<SQLException> sqlExceptions = new ArrayList<>();
+        int[] count = new int[1];
+        getByField(connection, entity, resultSet -> {
+            try {
+                while (resultSet.next())
+                    count[0]++;
+            } catch (SQLException e) {
+                sqlExceptions.add(e);
+            }
+        });
+        for (SQLException e : sqlExceptions)
+            throw e;
+        return count[0];
+    }
+
+    public static <T extends Entity> void create(Connection connection, T entity) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             Map<String, String> map = new HashMap<>();
             for (Field field : entity.getClass().getDeclaredFields()) {
@@ -117,7 +210,7 @@ public class PostgresCRUDMapper {
         }
     }
 
-    public static void update(Connection connection, Entity entity) throws SQLException {
+    public static <T extends Entity> void update(Connection connection, T entity) throws SQLException {
         Object primaryKey = getPrimaryKey(entity);
         if (!contains(connection, entity.getClass(), primaryKey)) {
             create(connection, entity);

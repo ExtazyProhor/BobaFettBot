@@ -13,7 +13,7 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
-    public boolean contains(Class<? extends Entity> clazz, Object primaryKey) throws SQLException {
+    public <T extends Entity> boolean contains(Class<T> clazz, Object primaryKey) throws SQLException {
         Connection connection = connectionPool.getConnection();
         boolean result = PostgresCRUDMapper.contains(connection, clazz, primaryKey);
         connectionPool.releaseConnection(connection);
@@ -21,7 +21,7 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
-    public void delete(Class<? extends Entity> clazz, Object primaryKey) throws SQLException {
+    public <T extends Entity> void delete(Class<T> clazz, Object primaryKey) throws SQLException {
         Connection connection = connectionPool.getConnection();
         PostgresCRUDMapper.delete(connection, clazz, primaryKey);
         connectionPool.releaseConnection(connection);
@@ -36,6 +36,22 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
+    public <T extends Entity> T getOneByField(T entity) throws Exception {
+        Connection connection = connectionPool.getConnection();
+        T result = PostgresCRUDMapper.getOneByField(connection, entity);
+        connectionPool.releaseConnection(connection);
+        return result;
+    }
+
+    @Override
+    public <T extends Entity> List<T> getAllByField(T entity) throws Exception {
+        Connection connection = connectionPool.getConnection();
+        List<T> result = PostgresCRUDMapper.getAllByField(connection, entity);
+        connectionPool.releaseConnection(connection);
+        return result;
+    }
+
+    @Override
     public <T extends Entity> List<T> getAll(Class<T> clazz) throws SQLException {
         Connection connection = connectionPool.getConnection();
         List<T> result = PostgresCRUDMapper.getAll(connection, clazz);
@@ -44,14 +60,22 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
-    public void create(Entity entity) throws SQLException {
+    public <T extends Entity> int countByField(T entity) throws Exception {
+        Connection connection = connectionPool.getConnection();
+        int result = PostgresCRUDMapper.countByField(connection, entity);
+        connectionPool.releaseConnection(connection);
+        return result;
+    }
+
+    @Override
+    public <T extends Entity> void create(T entity) throws SQLException {
         Connection connection = connectionPool.getConnection();
         PostgresCRUDMapper.create(connection, entity);
         connectionPool.releaseConnection(connection);
     }
 
     @Override
-    public void update(Entity entity) throws SQLException {
+    public <T extends Entity> void update(T entity) throws SQLException {
         Connection connection = connectionPool.getConnection();
         PostgresCRUDMapper.update(connection, entity);
         connectionPool.releaseConnection(connection);

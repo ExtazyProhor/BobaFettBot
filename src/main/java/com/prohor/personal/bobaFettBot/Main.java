@@ -1,10 +1,16 @@
 package com.prohor.personal.bobaFettBot;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
+import com.prohor.personal.bobaFettBot.bot.commands.CancelCommand;
 import com.prohor.personal.bobaFettBot.bot.commands.CommandsList;
+import com.prohor.personal.bobaFettBot.bot.commands.GetIdCommand;
 import com.prohor.personal.bobaFettBot.bot.commands.StartCommand;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
+import com.prohor.personal.bobaFettBot.features.holidays.callbacks.ChooseCustomHolidayDateCallback;
+import com.prohor.personal.bobaFettBot.features.holidays.callbacks.CustomHolidayCallback;
+import com.prohor.personal.bobaFettBot.features.holidays.commands.CustomHolidayCommand;
+import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitCustomHolidayName;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import com.prohor.personal.bobaFettBot.system.LogWriter;
 import org.json.JSONObject;
@@ -50,13 +56,20 @@ public class Main {
                     botTokens.getString("username"),
                     new BotService<>(
                             new StartCommand(),
-                            new CommandsList()),
-                    new BotPrefixService<>(),
+                            new CommandsList(),
+                            new GetIdCommand(),
+                            new CustomHolidayCommand(),
+                            new CancelCommand()),
+                    new BotPrefixService<>(
+                            ChooseCustomHolidayDateCallback.getInstance(),
+                            CustomHolidayCallback.getInstance()),
+                    new BotPrefixService<>(
+                            WaitCustomHolidayName.getInstance()),
                     new PostgresDataStorage(connectionPool),
                     exceptionWriter);
             telegramBotsApi.registerBot(bot);
 
-        } catch (SQLException | TelegramApiException | IOException e) {
+        } catch (Exception e) {
             exceptionWriter.writeException(e);
         }
     }

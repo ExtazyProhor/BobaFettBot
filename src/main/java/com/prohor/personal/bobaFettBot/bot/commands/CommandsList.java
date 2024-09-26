@@ -13,7 +13,7 @@ public class CommandsList extends BotCommand {
     @Override
     public void executeCommand(Message message, Bot bot) throws Exception {
         StringBuilder builder = new StringBuilder();
-        for (BotCommand s : bot.commandService) {
+        for (BotCommand s : bot.getAllCommands()) {
             if (s.getIdentifier().equals("/start") || s.getIdentifier().equals("/commands"))
                 continue;
             builder.append(s.getIdentifier()).append(" - ").append(s.getDescription()).append("\n");
