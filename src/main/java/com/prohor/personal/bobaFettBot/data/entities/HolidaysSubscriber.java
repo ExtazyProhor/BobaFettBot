@@ -25,10 +25,10 @@ public class HolidaysSubscriber implements Entity {
     @EntityField(name = "subscription_is_active")
     private Boolean subscriptionIsActive;
 
-    public HolidaysSubscriber(long chatId, LocalTime time, short indentation) {
+    public HolidaysSubscriber(long chatId, LocalTime dailyDistributionTime, Short indentationOfDays) {
         this.chatId = chatId;
-        this.dailyDistributionTime = time;
-        this.indentationOfDays = indentation;
+        this.dailyDistributionTime = dailyDistributionTime;
+        this.indentationOfDays = indentationOfDays;
         this.subscriptionIsActive = true;
     }
 }

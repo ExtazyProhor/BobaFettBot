@@ -4,14 +4,10 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.commands.*;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.ChooseCustomHolidayDateCallback;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.CustomHolidayCallback;
-import com.prohor.personal.bobaFettBot.features.holidays.commands.CustomHolidayCommand;
-import com.prohor.personal.bobaFettBot.features.holidays.commands.ImportHolidaysCommand;
-import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitCustomHolidayName;
-import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitImportChatId;
-import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
-import com.prohor.personal.bobaFettBot.system.LogWriter;
+import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
+import com.prohor.personal.bobaFettBot.features.holidays.commands.*;
+import com.prohor.personal.bobaFettBot.features.holidays.statuses.*;
+import com.prohor.personal.bobaFettBot.system.*;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -57,10 +53,12 @@ public class Main {
                             new CancelCommand(),
                             new GetIdCommand(),
                             new CustomHolidayCommand(),
-                            new ImportHolidaysCommand()),
+                            new ImportHolidaysCommand(),
+                            new SubscribeHolidaysCommand()),
                     new BotPrefixService<>(
                             ChooseCustomHolidayDateCallback.getInstance(),
-                            CustomHolidayCallback.getInstance()),
+                            CustomHolidayCallback.getInstance(),
+                            SubscribeHolidaysCallback.getInstance()),
                     new BotPrefixService<>(
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
