@@ -65,7 +65,7 @@ public final class Holidays {
                 .getJSONArray(date.getMonthValue() - 1)
                 .getJSONObject(date.getDayOfMonth() - 1)
                 .getJSONArray("holidays");
-        return new HolidayData(formatHeader(DateTimeUtil.getRussianDate(date)),
+        return new HolidayData(formatHeader(DateTimeUtil.getRussianDate(date) + " " + date.getYear()),
                 formatHolidays(holidays.toList().stream().map(Object::toString).toList()));
     }
 

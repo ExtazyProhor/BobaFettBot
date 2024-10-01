@@ -62,7 +62,7 @@ public class GetHolidaysCallback extends BotCallback {
         }
     }
 
-    private static final String CHOOSE_DATE_MESSAGE = "Выберите дату праздников";
+    private static final String CHOOSE_DATE_MESSAGE = "Выберите дату праздников (этого или следующего года)";
     private static final List<String> ACCEPT_ROW = List.of("Выбрать эту дату");
     private static final List<String> DAY_ROW_TEXT = List.of("-5 дней", "-1 день", "+1 день", "+5 дней");
     private static final List<String> MONTH_ROW_TEXT = List.of("-3 месяца", "-1 месяц", "+1 месяц", "+3 месяца");
@@ -71,7 +71,8 @@ public class GetHolidaysCallback extends BotCallback {
         date = fixDate(date);
         String prefix = getIdentifier() + date + '.';
         InlineKeyboardMarkup keyboard = Keyboard.getInlineKeyboard(
-                List.of(List.of(DateTimeUtil.getRussianDate(date)), DAY_ROW_TEXT, MONTH_ROW_TEXT, ACCEPT_ROW),
+                List.of(List.of(DateTimeUtil.getRussianDate(date) + " " + date.getYear()),
+                        DAY_ROW_TEXT, MONTH_ROW_TEXT, ACCEPT_ROW),
                 List.of(List.of("-"),
                         List.of(prefix + "<5D", prefix + "<1D", prefix + ">1D", prefix + ">5D"),
                         List.of(prefix + "<3M", prefix + "<1M", prefix + ">1M", prefix + ">3M"),
@@ -96,7 +97,7 @@ public class GetHolidaysCallback extends BotCallback {
         int thisYear = Holidays.getToday().getYear();
         if (date.getYear() > thisYear + 1)
             return date.withYear(thisYear + 1);
-        if (date.getYear() > thisYear)
+        if (date.getYear() < thisYear)
             return date.withYear(thisYear);
         return date;
     }
