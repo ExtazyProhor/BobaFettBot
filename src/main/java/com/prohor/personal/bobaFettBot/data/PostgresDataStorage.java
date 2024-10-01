@@ -36,17 +36,17 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
-    public <T extends Entity> T getOneByField(T entity) throws Exception {
+    public <T extends Entity> T getOneByFields(T entity) throws Exception {
         Connection connection = connectionPool.getConnection();
-        T result = PostgresCRUDMapper.getOneByField(connection, entity);
+        T result = PostgresCRUDMapper.getOneByFields(connection, entity);
         connectionPool.releaseConnection(connection);
         return result;
     }
 
     @Override
-    public <T extends Entity> List<T> getAllByField(T entity) throws Exception {
+    public <T extends Entity> List<T> getAllByFields(T entity) throws Exception {
         Connection connection = connectionPool.getConnection();
-        List<T> result = PostgresCRUDMapper.getAllByField(connection, entity);
+        List<T> result = PostgresCRUDMapper.getAllByFields(connection, entity);
         connectionPool.releaseConnection(connection);
         return result;
     }

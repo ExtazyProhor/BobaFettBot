@@ -3,8 +3,6 @@ package com.prohor.personal.bobaFettBot.data.entities;
 import com.prohor.personal.bobaFettBot.data.mapping.*;
 import lombok.*;
 
-import java.time.*;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -20,14 +18,23 @@ public class CustomHoliday implements Entity {
     private Long chatId;
     @Setter
     @EntityField(name = "holiday_date")
-    private LocalDate holidayDate;
+    private Short holidayDate;
     @Setter
     @EntityField(name = "holiday_name")
     private String holidayName;
 
-    public CustomHoliday(long chatId, LocalDate holidayDate, String holidayName) {
+    public CustomHoliday(long chatId, Short holidayDate, String holidayName) {
         this.chatId = chatId;
         this.holidayDate = holidayDate;
         this.holidayName = holidayName;
+    }
+
+    public CustomHoliday(long chatId, Short holidayDate) {
+        this.chatId = chatId;
+        this.holidayDate = holidayDate;
+    }
+
+    public CustomHoliday(Short holidayDate) {
+        this.holidayDate = holidayDate;
     }
 }

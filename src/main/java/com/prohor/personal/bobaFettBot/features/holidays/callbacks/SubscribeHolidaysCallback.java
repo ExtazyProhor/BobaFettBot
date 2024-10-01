@@ -46,13 +46,11 @@ public class SubscribeHolidaysCallback extends BotCallback {
                 switch (callback) {
                     case "time" -> settingSubscription(time, indent, chatId, messageId, bot);
                     case "confirm" -> {
-                        HolidaysSubscriber subscriber = new HolidaysSubscriber(chatId, time, (short) indent);
-                        if (bot.storage.contains(HolidaysSubscriber.class, chatId))
-                            bot.storage.update(subscriber);
-                        else
-                            bot.storage.create(subscriber);
+                        HolidaysSubscriber subscriber = new HolidaysSubscriber(chatId, time, (short) indent, true);
+                        bot.storage.update(subscriber);
                         bot.editMessageText(EditMessageText.builder()
-                                .text("Настройки успешно применены")
+                                .text("Настройки успешно применены. В " + time + " каждый день будет приходить " +
+                                        "список праздников " + INDENT_TEXT[indent])
                                 .messageId(messageId)
                                 .chatId(chatId)
                                 .build());
@@ -67,6 +65,7 @@ public class SubscribeHolidaysCallback extends BotCallback {
             "Выберите время ежедневной рассылки и день праздников, относительно даты рассылки";
     private static final List<String> TIME_TEXT = List.of("-1:00", "-0:15", "+0:15", "+1:00");
     private static final String[] INDENTS = {".0", ".1", ".2"};
+    private static final String[] INDENT_TEXT = {"того же дня", "следующего дня", "после-следующего дня"};
 
     public void settingSubscription(LocalTime time, long chatId, Bot bot) throws Exception {
         settingSubscription(time, 0, chatId, null, bot);
@@ -90,9 +89,9 @@ public class SubscribeHolidaysCallback extends BotCallback {
                                 TIME_PREFIX + time.minusMinutes(15) + INDENTS[indent],
                                 TIME_PREFIX + time.plusMinutes(15) + INDENTS[indent],
                                 TIME_PREFIX + time.plusHours(1) + INDENTS[indent]),
-                        List.of(TIME_PREFIX + time + INDENTS[0]),
-                        List.of(TIME_PREFIX + time + INDENTS[1]),
-                        List.of(TIME_PREFIX + time + INDENTS[2]),
+                        List.of(indent == 0 ? "-" : (TIME_PREFIX + time + INDENTS[0])),
+                        List.of(indent == 1 ? "-" : (TIME_PREFIX + time + INDENTS[1])),
+                        List.of(indent == 2 ? "-" : (TIME_PREFIX + time + INDENTS[2])),
                         List.of(getIdentifier() + "confirm." + time + INDENTS[indent])));
 
         if (messageId == null)
@@ -110,18 +109,17 @@ public class SubscribeHolidaysCallback extends BotCallback {
                     .build());
     }
 
+    private final InlineKeyboardMarkup MENU_KEYBOARD_SUB = Keyboard.getColumnInlineKeyboard(
+            List.of("Настроить время рассылки и дату праздников", "Отписаться от рассылки"),
+            List.of(getIdentifier() + "settings", getIdentifier() + "uns"));
+    private final InlineKeyboardMarkup MENU_KEYBOARD_UNS = Keyboard.getColumnInlineKeyboard(
+            List.of("Подписаться на рассылку"), List.of(getIdentifier() + "sub"));
+
     public void sendMenu(long chatId, Bot bot) throws Exception {
         boolean subscribed = bot.storage.get(HolidaysSubscriber.class, chatId).getSubscriptionIsActive();
-        String prefix = getIdentifier();
         bot.sendMessage(SendMessage.builder()
                 .text("Что вы хотите сделать?")
-                .replyMarkup(Keyboard.getColumnInlineKeyboard(
-                        List.of(
-                                "Настроить время рассылки и дату праздников",
-                                subscribed ? "Отписаться от рассылки" : "Подписаться на рассылку"),
-                        List.of(
-                                prefix + "settings",
-                                prefix + (subscribed ? "uns" : "sub"))))
+                .replyMarkup(subscribed ? MENU_KEYBOARD_SUB : MENU_KEYBOARD_UNS)
                 .chatId(chatId)
                 .build());
     }

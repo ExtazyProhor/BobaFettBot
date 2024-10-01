@@ -9,6 +9,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDate;
 
+import static com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil.getShortDateRepresentation;
+
 public class WaitCustomHolidayName extends BotStatus {
     private WaitCustomHolidayName() {
         super("holidays.wait-name.");
@@ -46,7 +48,8 @@ public class WaitCustomHolidayName extends BotStatus {
             bot.sendMessage(answer);
             return;
         }
-        bot.storage.create(new CustomHoliday(chatId, LocalDate.parse(status), customHolidayName));
+        bot.storage.create(new CustomHoliday(chatId,
+                getShortDateRepresentation(LocalDate.parse(status)), customHolidayName));
         BotStatus.deleteStatus(bot, chatId);
         answer.setText("Праздник \"" + customHolidayName + "\" успешно добавлен");
         bot.sendMessage(answer);

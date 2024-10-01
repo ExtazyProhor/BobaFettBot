@@ -12,9 +12,9 @@ public interface DataStorage {
 
     <T extends Entity> T get(Class<T> clazz, Object primaryKey) throws Exception;
 
-    <T extends Entity> T getOneByField(T entity) throws Exception;
+    <T extends Entity> T getOneByFields(T entity) throws Exception;
 
-    <T extends Entity> List<T> getAllByField(T entity) throws Exception;
+    <T extends Entity> List<T> getAllByFields(T entity) throws Exception;
 
     <T extends Entity> List<T> getAll(Class<T> clazz) throws Exception;
 

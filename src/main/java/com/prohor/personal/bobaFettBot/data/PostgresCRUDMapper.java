@@ -7,6 +7,7 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.*;
 
 public class PostgresCRUDMapper {
     public static <T extends Entity> boolean contains(Connection connection, Class<T> clazz, Object primaryKey)
@@ -63,7 +64,7 @@ public class PostgresCRUDMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> T getOneByField(Connection connection, T entity) throws SQLException {
+    public static <T extends Entity> T getOneByFields(Connection connection, T entity) throws SQLException {
         List<SQLException> sqlExceptions = new ArrayList<>();
         List<T> list = new ArrayList<>();
         getByField(connection, entity, resultSet -> {
@@ -83,7 +84,7 @@ public class PostgresCRUDMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> List<T> getAllByField(Connection connection, T entity) throws SQLException {
+    public static <T extends Entity> List<T> getAllByFields(Connection connection, T entity) throws SQLException {
         List<SQLException> sqlExceptions = new ArrayList<>();
         List<T> list = new ArrayList<>();
         getByField(connection, entity, resultSet -> {
@@ -102,9 +103,10 @@ public class PostgresCRUDMapper {
     private static <T extends Entity> void getByField(Connection connection, T entity, Consumer<ResultSet> consumer)
             throws SQLException {
 
-        Object value = null;
-        String column = null;
+        List<Object> values = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         for (Field field : entity.getClass().getDeclaredFields()) {
+            Object value = null;
             field.setAccessible(true);
             EntityField entityField = field.getAnnotation(EntityField.class);
             if (entityField == null)
@@ -116,17 +118,21 @@ public class PostgresCRUDMapper {
             }
             if (value == null)
                 continue;
-            column = entityField.name();
-            break;
+            values.add(value);
+            columns.add(entityField.name());
         }
-        if (column == null)
+        if (columns.isEmpty())
             throw new MappingException("entity hasn't not null fields");
 
         Statement statement = null;
         ResultSet resultSet = null;
         try {
-            String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + " WHERE " + column + " = " +
-                    wrapObject(value) + ";";
+            String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + " WHERE " +
+                    IntStream.range(0, columns.size())
+                            .mapToObj(i -> columns.get(i) + " = " + wrapObject(values.get(i)))
+                            .collect(Collectors.joining(" AND ")) + ";";
+
+
             statement = connection.createStatement();
             resultSet = statement.executeQuery(sqlQuery);
             consumer.accept(resultSet);
@@ -241,15 +247,18 @@ public class PostgresCRUDMapper {
             if (map.size() == 0)
                 throw new MappingException("entities are identical");
 
-            StringBuilder sql = new StringBuilder();
-            sql.append("UPDATE ").append(getTableName(entity.getClass())).append(" SET ");
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                sql.append(entry.getKey()).append(" = ").append(entry.getValue()).append(", ");
-            }
-            sql.setLength(sql.length() - 2);
-            sql.append(";");
-
-            statement.execute(sql.toString());
+            String sql = "UPDATE " +
+                    getTableName(entity.getClass()) +
+                    " SET " +
+                    map.entrySet().stream()
+                            .map(x -> x.getKey() + " = " + x.getValue())
+                            .collect(Collectors.joining(", ")) +
+                    " WHERE " +
+                    getPrimaryKeyColumnName(entity.getClass()) +
+                    " = " +
+                    getPrimaryKey(entity) +
+                    ";";
+            statement.execute(sql);
         }
     }
 

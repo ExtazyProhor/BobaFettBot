@@ -4,6 +4,8 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.commands.*;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.*;
+import com.prohor.personal.bobaFettBot.features.holidays.Holidays;
+import com.prohor.personal.bobaFettBot.features.holidays.HolidaysDistributor;
 import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
 import com.prohor.personal.bobaFettBot.features.holidays.commands.*;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.*;
@@ -54,17 +56,22 @@ public class Main {
                             new GetIdCommand(),
                             new CustomHolidayCommand(),
                             new ImportHolidaysCommand(),
-                            new SubscribeHolidaysCommand()),
+                            new SubscribeHolidaysCommand(),
+                            new GetHolidaysCommand()),
                     new BotPrefixService<>(
                             ChooseCustomHolidayDateCallback.getInstance(),
                             CustomHolidayCallback.getInstance(),
-                            SubscribeHolidaysCallback.getInstance()),
+                            SubscribeHolidaysCallback.getInstance(),
+                            GetHolidaysCallback.getInstance()),
                     new BotPrefixService<>(
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
                     new PostgresDataStorage(connectionPool),
                     exceptionWriter);
             telegramBotsApi.registerBot(bot);
+
+            new HolidaysDistributor(bot, exceptionWriter);
+            Holidays.init(directory, exceptionWriter);
 
         } catch (Exception e) {
             exceptionWriter.writeException(e);

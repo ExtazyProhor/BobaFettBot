@@ -4,6 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.CustomHoliday;
+import com.prohor.personal.bobaFettBot.features.holidays.Holidays;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -63,7 +64,7 @@ public class CustomHolidayCallback extends BotCallback {
     }
 
     public void createCustomHoliday(long chatId, Bot bot) throws Exception {
-        LocalDate now = getNow();
+        LocalDate now = Holidays.getToday();
         bot.sendMessage(SendMessage.builder()
                 .chatId(chatId)
                 .text(ChooseCustomHolidayDateCallback.getMessageForDate(now))
@@ -72,7 +73,7 @@ public class CustomHolidayCallback extends BotCallback {
     }
 
     private void createCustomHoliday(long chatId, int messageId, Bot bot) throws Exception {
-        LocalDate now = getNow();
+        LocalDate now = Holidays.getToday();
         bot.editMessageText(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
@@ -86,7 +87,7 @@ public class CustomHolidayCallback extends BotCallback {
     private void deleteCustomHoliday(int page, long chatId, int messageId, Bot bot) throws Exception {
         CustomHoliday holiday = new CustomHoliday();
         holiday.setChatId(chatId);
-        List<CustomHoliday> customHolidays = bot.storage.getAllByField(holiday);
+        List<CustomHoliday> customHolidays = bot.storage.getAllByFields(holiday);
         if (customHolidays.isEmpty()) {
             hasNotHolidays(chatId, messageId, bot);
             return;
@@ -128,7 +129,7 @@ public class CustomHolidayCallback extends BotCallback {
     private void listCustomHoliday(int page, long chatId, int messageId, Bot bot) throws Exception {
         CustomHoliday holiday = new CustomHoliday();
         holiday.setChatId(chatId);
-        List<CustomHoliday> customHolidays = bot.storage.getAllByField(holiday);
+        List<CustomHoliday> customHolidays = bot.storage.getAllByFields(holiday);
         if (customHolidays.isEmpty()) {
             hasNotHolidays(chatId, messageId, bot);
             return;

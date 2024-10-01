@@ -6,7 +6,6 @@ import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
 import com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitCustomHolidayName;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -30,34 +29,36 @@ public class ChooseCustomHolidayDateCallback extends BotCallback {
     @Override
     public void callbackReceived(CallbackQuery callbackQuery, Bot bot) throws Exception {
         String callbackSuffix = getSuffix(callbackQuery);
-        LocalDate date = LocalDate.parse(callbackSuffix.substring(0, callbackSuffix.indexOf('.')));
+        LocalDate date = LocalDate.parse(callbackSuffix.substring(0, callbackSuffix.indexOf('.'))).withYear(2024);
         String callback = callbackSuffix.substring(callbackSuffix.indexOf('.') + 1);
+        long chatId = callbackQuery.getMessage().getChatId();
+        int messageId = callbackQuery.getMessage().getMessageId();
         switch (callback) {
             case "apply" -> {
-                long chatId = callbackQuery.getMessage().getChatId();
                 bot.storage.create(new UserStatus(chatId, WaitCustomHolidayName.getInstance().getIdentifier() + date));
                 bot.usersWithStatus.add(chatId);
-                bot.sendMessage(SendMessage.builder()
+                bot.editMessageText(EditMessageText.builder()
                         .chatId(chatId)
+                        .messageId(messageId)
                         .text("Теперь напишите название вашего праздника (не более 50 символов):")
                         .build());
             }
-            case "<5D" -> updateMessage(date.minusDays(5), callbackQuery, bot);
-            case ">5D" -> updateMessage(date.plusDays(5), callbackQuery, bot);
-            case "<1D" -> updateMessage(date.minusDays(1), callbackQuery, bot);
-            case ">1D" -> updateMessage(date.plusDays(1), callbackQuery, bot);
-            case "<3M" -> updateMessage(date.minusMonths(3), callbackQuery, bot);
-            case ">3M" -> updateMessage(date.plusMonths(3), callbackQuery, bot);
-            case "<1M" -> updateMessage(date.minusMonths(1), callbackQuery, bot);
-            case ">1M" -> updateMessage(date.plusMonths(1), callbackQuery, bot);
+            case "<5D" -> updateMessage(date.minusDays(5), chatId, messageId, bot);
+            case ">5D" -> updateMessage(date.plusDays(5), chatId, messageId, bot);
+            case "<1D" -> updateMessage(date.minusDays(1), chatId, messageId, bot);
+            case ">1D" -> updateMessage(date.plusDays(1), chatId, messageId, bot);
+            case "<3M" -> updateMessage(date.minusMonths(3), chatId, messageId, bot);
+            case ">3M" -> updateMessage(date.plusMonths(3), chatId, messageId, bot);
+            case "<1M" -> updateMessage(date.minusMonths(1), chatId, messageId, bot);
+            case ">1M" -> updateMessage(date.plusMonths(1), chatId, messageId, bot);
         }
     }
 
-    private static void updateMessage(LocalDate date, CallbackQuery callback, Bot bot) throws Exception {
+    private static void updateMessage(LocalDate date, long chatId, int messageId, Bot bot) throws Exception {
         bot.editMessageText(
                 EditMessageText.builder()
-                        .chatId(callback.getMessage().getChatId())
-                        .messageId(callback.getMessage().getMessageId())
+                        .chatId(chatId)
+                        .messageId(messageId)
                         .text(getMessageForDate(date))
                         .replyMarkup(getKeyboardForDateChoose(date))
                         .build()

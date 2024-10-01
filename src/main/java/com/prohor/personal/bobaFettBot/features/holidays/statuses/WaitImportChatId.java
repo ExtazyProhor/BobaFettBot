@@ -58,7 +58,7 @@ public class WaitImportChatId extends BotStatus {
 
         CustomHoliday customHoliday = new CustomHoliday();
         customHoliday.setChatId(importChatIdLong);
-        List<CustomHoliday> customHolidays = bot.storage.getAllByField(customHoliday);
+        List<CustomHoliday> customHolidays = bot.storage.getAllByFields(customHoliday);
         if (customHolidays.size() == 0)
             answer.setText("У пользователя с указанным ID нет собственных праздников");
         else {

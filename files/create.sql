@@ -15,14 +15,14 @@ CREATE TABLE holidays (
 CREATE TABLE custom_holidays (
     custom_holiday_id SERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE,
-    holiday_date DATE NOT NULL,
+    holiday_date SMALLINT NOT NULL,
     holiday_name VARCHAR(50)
 );
 
-CREATE INDEX custom_holiday_chat_id_index
+CREATE INDEX custom_holidays_chat_id_index
 ON custom_holidays (chat_id);
 
-CREATE INDEX custom_holiday_holiday_date_index
+CREATE INDEX custom_holidays_holiday_date_index
 ON custom_holidays (holiday_date);
 
 CREATE TABLE chat_owners (
