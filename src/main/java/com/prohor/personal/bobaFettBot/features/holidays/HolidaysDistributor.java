@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil.getShortDateRepresentation;
 
@@ -40,9 +41,11 @@ public class HolidaysDistributor implements Runnable {
             Map<Long, List<String>> usersCustomHolidays = getUsersCustomHolidays();
             List<HolidaysSubscriber> subscribers = bot.storage.getAllByFields(atTime);
             for (HolidaysSubscriber subscriber : subscribers) {
+                long chatId = subscriber.getChatId();
+                reminderAboutCustomHolidays(chatId, today, bot);
                 int indent = subscriber.getIndentationOfDays();
                 bot.sendMessage(SendMessage.builder()
-                        .chatId(subscriber.getChatId())
+                        .chatId(chatId)
                         .text(Holidays.getHolidaysMessage(usersCustomHolidays.get(subscriber.getChatId()),
                                 today.plusDays(indent)))
                         .build());
@@ -69,6 +72,18 @@ public class HolidaysDistributor implements Runnable {
             map.get(customHoliday.getChatId()).add(customHoliday.getHolidayName());
         }
         return map;
+    }
+
+    private void reminderAboutCustomHolidays(long chatId, LocalDate today, Bot bot) throws Exception {
+        CustomHoliday condition = new CustomHoliday(chatId, DateTimeUtil.getShortDateRepresentation(today.plusDays(7)));
+        if (!bot.storage.containsByFields(condition))
+            return;
+        bot.sendMessage(SendMessage.builder()
+                .text("Напоминаю, что через неделю будет:\n\n" + bot.storage.getAllByFields(condition).stream()
+                        .map(x -> "- " + x.getHolidayName())
+                        .collect(Collectors.joining("\n")))
+                .chatId(chatId)
+                .build());
     }
 
     private static LocalTime getRoundedTime() {

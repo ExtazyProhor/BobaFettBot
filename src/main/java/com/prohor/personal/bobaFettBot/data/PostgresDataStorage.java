@@ -21,6 +21,14 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
+    public <T extends Entity> boolean containsByFields(T entity) throws Exception {
+        Connection connection = connectionPool.getConnection();
+        boolean result = PostgresCRUDMapper.containsByFields(connection, entity);
+        connectionPool.releaseConnection(connection);
+        return result;
+    }
+
+    @Override
     public <T extends Entity> void delete(Class<T> clazz, Object primaryKey) throws SQLException {
         Connection connection = connectionPool.getConnection();
         PostgresCRUDMapper.delete(connection, clazz, primaryKey);
@@ -60,9 +68,9 @@ public class PostgresDataStorage implements DataStorage {
     }
 
     @Override
-    public <T extends Entity> int countByField(T entity) throws Exception {
+    public <T extends Entity> int countByFields(T entity) throws Exception {
         Connection connection = connectionPool.getConnection();
-        int result = PostgresCRUDMapper.countByField(connection, entity);
+        int result = PostgresCRUDMapper.countByFields(connection, entity);
         connectionPool.releaseConnection(connection);
         return result;
     }

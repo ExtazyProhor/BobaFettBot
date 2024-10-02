@@ -21,7 +21,7 @@ public class CustomHolidayCommand extends BotCommand {
     public void executeCommand(Message message, Bot bot) throws Exception {
         CustomHoliday customHoliday = new CustomHoliday();
         customHoliday.setChatId(message.getChatId());
-        if (bot.storage.countByField(customHoliday) == 0) {
+        if (bot.storage.countByFields(customHoliday) == 0) {
             CustomHolidayCallback.getInstance().createCustomHoliday(message.getChatId(), bot);
             return;
         }
