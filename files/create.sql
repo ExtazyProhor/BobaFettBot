@@ -25,14 +25,6 @@ ON custom_holidays (chat_id);
 CREATE INDEX custom_holidays_holiday_date_index
 ON custom_holidays (holiday_date);
 
-CREATE TABLE chat_owners (
-    chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
-    owner_id BIGINT NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE
-);
-
-CREATE INDEX owner_id_index
-ON chat_owners (owner_id);
-
 CREATE TABLE user_statuses (
     chat_id BIGINT PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
     status VARCHAR(64) NOT NULL

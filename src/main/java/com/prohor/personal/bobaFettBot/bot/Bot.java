@@ -2,14 +2,12 @@ package com.prohor.personal.bobaFettBot.bot;
 
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
-import com.prohor.personal.bobaFettBot.data.entities.ChatOwner;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -128,43 +126,8 @@ public class Bot extends TelegramLongPollingBot {
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
 
         if (newChatMember instanceof ChatMemberLeft || newChatMember instanceof ChatMemberBanned)
-            if (storage.contains(User.class, chatId)) {
+            if (storage.contains(User.class, chatId))
                 storage.delete(User.class, chatId);
-                return;
-            }
-        if (!update.getMyChatMember().getChat().isChannelChat())
-            return;
-        if (!(newChatMember instanceof ChatMemberAdministrator chatMemberAdministrator))
-            return;
-        if (!chatMemberAdministrator.getCanPostMessages())
-            return;
-        if (storage.contains(User.class, chatId))
-            return;
-        Chat chat = update.getMyChatMember().getChat();
-        storage.create(new User(chat.getId(), chat.getType(), chat.getTitle()));
-
-        boolean sent = true;
-        long ownerId = update.getMyChatMember().getFrom().getId();
-        try {
-            execute(SendMessage.builder()
-                    .chatId(ownerId)
-                    .text("В этом чате вы теперь можете управлять поведением бота в канале \"" + chat.getTitle() +
-                            "\". Для этого используйте команду /my_channels. Чтобы поменять управляющего ботом в " +
-                            "этом канале на другого пользователя, этот пользователь должен добавить бота в канал " +
-                            "сам, после предварительного удаления")
-                    .build());
-        } catch (TelegramApiException e) {
-            sent = false;
-        }
-        if (sent)
-            storage.create(new ChatOwner(chatId, ownerId));
-        else
-            sendMessage(SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Личный чат с пользователем " + update.getMyChatMember().getFrom().getFirstName() +
-                            ", добавившим бота в этот канал недоступен. Настройка невозможна. Начните диалог с " +
-                            "ботом, затем удалите его из канала и добавьте заново")
-                    .build());
     }
 
     public Collection<BotCommand> getAllCommands() {
