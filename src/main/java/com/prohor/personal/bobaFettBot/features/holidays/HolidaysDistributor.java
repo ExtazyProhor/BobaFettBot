@@ -90,8 +90,9 @@ public class HolidaysDistributor implements Runnable {
         LocalTime now = DateTimeUtil.getTimeNow();
         int minutes = now.getMinute();
         int roundedMinutes = (int) (Math.round(minutes / 15.0) * 15) % 60;
-        int hourAdjustment = (roundedMinutes < minutes) ? 0 : (roundedMinutes == 0 ? 1 : 0);
-        int newHour = (now.getHour() + hourAdjustment) % 24;
+        int newHour = now.getHour();
+        if (roundedMinutes == 0 && minutes > 30)
+            newHour = (newHour + 1) % 24;
         return LocalTime.of(newHour, roundedMinutes);
     }
 }

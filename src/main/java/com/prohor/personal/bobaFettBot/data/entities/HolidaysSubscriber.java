@@ -24,11 +24,4 @@ public class HolidaysSubscriber implements Entity {
     @Setter
     @EntityField(name = "subscription_is_active")
     private Boolean subscriptionIsActive;
-
-    public HolidaysSubscriber(long chatId, LocalTime dailyDistributionTime, Short indentationOfDays) {
-        this.chatId = chatId;
-        this.dailyDistributionTime = dailyDistributionTime;
-        this.indentationOfDays = indentationOfDays;
-        this.subscriptionIsActive = true;
-    }
 }
