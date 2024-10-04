@@ -39,7 +39,6 @@ public class ConnectionPool {
     public synchronized Connection getConnection() throws SQLException {
         if (availableConnections.isEmpty()) {
             try {
-                System.out.println("waiting connection...");
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();

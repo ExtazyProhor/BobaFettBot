@@ -8,6 +8,7 @@ import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -86,6 +87,8 @@ public class Bot extends TelegramLongPollingBot {
         try {
             execute(editMessageText);
         } catch (TelegramApiException e) {
+            if (e.getMessage().contains("message is not modified"))
+                return;
             checkException(e, editMessageText.getChatId());
         }
     }
@@ -124,6 +127,10 @@ public class Bot extends TelegramLongPollingBot {
     private void hasMyChatMember(Update update) throws Exception {
         long chatId = update.getMyChatMember().getChat().getId();
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
+        Chat chat = update.getMyChatMember().getChat();
+
+        if (!storage.contains(User.class, chatId))
+            storage.create(new User(chatId, chat.getType(), chat.getTitle()));
 
         if (newChatMember instanceof ChatMemberLeft || newChatMember instanceof ChatMemberBanned)
             if (storage.contains(User.class, chatId))
