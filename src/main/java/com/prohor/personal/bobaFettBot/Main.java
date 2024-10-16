@@ -70,8 +70,8 @@ public class Main {
                     exceptionWriter);
             telegramBotsApi.registerBot(bot);
 
-            new HolidaysDistributor(bot, exceptionWriter);
             Holidays.init(directory, exceptionWriter);
+            new HolidaysDistributor(bot, exceptionWriter);
 
         } catch (Exception e) {
             exceptionWriter.writeException(e);

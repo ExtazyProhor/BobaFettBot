@@ -32,13 +32,13 @@ public class HolidaysDistributor implements Runnable {
     public void run() {
         HolidaysSubscriber atTime = new HolidaysSubscriber();
         LocalTime roundedNow = getRoundedTime();
-        LocalDate today = DateTimeUtil.getNow();
         if (roundedNow.getHour() == 0 && roundedNow.getMinute() == 0)
-            Holidays.setToday(today);
+            Holidays.setToday(DateTimeUtil.getNow());
+        LocalDate today = Holidays.getToday();
         atTime.setDailyDistributionTime(roundedNow);
         atTime.setSubscriptionIsActive(true);
         try {
-            Map<Long, List<String>> usersCustomHolidays = getUsersCustomHolidays();
+            List<Map<Long, List<String>>> usersCustomHolidays = getUsersCustomHolidays();
             List<HolidaysSubscriber> subscribers = bot.storage.getAllByFields(atTime);
             for (HolidaysSubscriber subscriber : subscribers) {
                 long chatId = subscriber.getChatId();
@@ -46,7 +46,7 @@ public class HolidaysDistributor implements Runnable {
                 int indent = subscriber.getIndentationOfDays();
                 bot.sendMessage(SendMessage.builder()
                         .chatId(chatId)
-                        .text(Holidays.getHolidaysMessage(usersCustomHolidays.get(subscriber.getChatId()),
+                        .text(Holidays.getHolidaysMessage(usersCustomHolidays.get(indent).get(subscriber.getChatId()),
                                 today.plusDays(indent)))
                         .build());
             }
@@ -55,23 +55,23 @@ public class HolidaysDistributor implements Runnable {
         }
     }
 
-    private Map<Long, List<String>> getUsersCustomHolidays() throws Exception {
+    // List by indents < Map < chatId, List of holidays < String > > >
+    private List<Map<Long, List<String>>> getUsersCustomHolidays() throws Exception {
         LocalDate today = Holidays.getToday();
-        List<CustomHoliday> customHolidays = new ArrayList<>();
-        customHolidays.addAll(bot.storage.getAllByFields(
-                new CustomHoliday(getShortDateRepresentation(today))));
-        customHolidays.addAll(bot.storage.getAllByFields(
-                new CustomHoliday(getShortDateRepresentation(today.plusDays(1)))));
-        customHolidays.addAll(bot.storage.getAllByFields(
-                new CustomHoliday(getShortDateRepresentation(today.plusDays(2)))));
+        List<Map<Long, List<String>>> list = new ArrayList<>();
 
-        Map<Long, List<String>> map = new HashMap<>();
-        for (CustomHoliday customHoliday : customHolidays) {
-            if (!map.containsKey(customHoliday.getChatId()))
-                map.put(customHoliday.getChatId(), new ArrayList<>());
-            map.get(customHoliday.getChatId()).add(customHoliday.getHolidayName());
+        for (int i = 0; i < 3; ++i) {
+            List<CustomHoliday> customHolidays = bot.storage.getAllByFields(
+                    new CustomHoliday(getShortDateRepresentation(today.plusDays(i))));
+            Map<Long, List<String>> map = new HashMap<>();
+            for (CustomHoliday customHoliday : customHolidays) {
+                if (!map.containsKey(customHoliday.getChatId()))
+                    map.put(customHoliday.getChatId(), new ArrayList<>());
+                map.get(customHoliday.getChatId()).add(customHoliday.getHolidayName());
+            }
+            list.add(map);
         }
-        return map;
+        return list;
     }
 
     private void reminderAboutCustomHolidays(long chatId, LocalDate today, Bot bot) throws Exception {
