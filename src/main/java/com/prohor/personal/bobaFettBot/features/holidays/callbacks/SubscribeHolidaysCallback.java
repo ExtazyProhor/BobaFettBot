@@ -4,7 +4,6 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.HolidaysSubscriber;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -67,11 +66,7 @@ public class SubscribeHolidaysCallback extends BotCallback {
     private static final String[] INDENTS = {".0", ".1", ".2"};
     private static final String[] INDENT_TEXT = {"того же дня", "следующего дня", "после-следующего дня"};
 
-    public void settingSubscription(LocalTime time, long chatId, Bot bot) throws Exception {
-        settingSubscription(time, 0, chatId, null, bot);
-    }
-
-    private void settingSubscription(LocalTime time, int indent, long chatId, Integer messageId, Bot bot)
+    public void settingSubscription(LocalTime time, int indent, long chatId, int messageId, Bot bot)
             throws Exception {
 
         InlineKeyboardMarkup keyboardMarkup = Keyboard.getInlineKeyboard(
@@ -94,19 +89,12 @@ public class SubscribeHolidaysCallback extends BotCallback {
                         List.of(indent == 2 ? "-" : (TIME_PREFIX + time + INDENTS[2])),
                         List.of(getIdentifier() + "confirm." + time + INDENTS[indent])));
 
-        if (messageId == null)
-            bot.sendMessage(SendMessage.builder()
-                    .text(SETTINGS_MESSAGE)
-                    .replyMarkup(keyboardMarkup)
-                    .chatId(chatId)
-                    .build());
-        else
-            bot.editMessageText(EditMessageText.builder()
-                    .text(SETTINGS_MESSAGE)
-                    .replyMarkup(keyboardMarkup)
-                    .chatId(chatId)
-                    .messageId(messageId)
-                    .build());
+        bot.editMessageText(EditMessageText.builder()
+                .text(SETTINGS_MESSAGE)
+                .replyMarkup(keyboardMarkup)
+                .chatId(chatId)
+                .messageId(messageId)
+                .build());
     }
 
     private final InlineKeyboardMarkup MENU_KEYBOARD_SUB = Keyboard.getColumnInlineKeyboard(
@@ -115,12 +103,13 @@ public class SubscribeHolidaysCallback extends BotCallback {
     private final InlineKeyboardMarkup MENU_KEYBOARD_UNS = Keyboard.getColumnInlineKeyboard(
             List.of("Подписаться на рассылку"), List.of(getIdentifier() + "sub"));
 
-    public void sendMenu(long chatId, Bot bot) throws Exception {
+    public void sendMenu(long chatId, int messageId, Bot bot) throws Exception {
         boolean subscribed = bot.storage.get(HolidaysSubscriber.class, chatId).getSubscriptionIsActive();
-        bot.sendMessage(SendMessage.builder()
+        bot.editMessageText(EditMessageText.builder()
                 .text("Что вы хотите сделать?")
                 .replyMarkup(subscribed ? MENU_KEYBOARD_SUB : MENU_KEYBOARD_UNS)
                 .chatId(chatId)
+                .messageId(messageId)
                 .build());
     }
 

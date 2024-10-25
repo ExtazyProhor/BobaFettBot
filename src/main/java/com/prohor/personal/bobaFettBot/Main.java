@@ -7,7 +7,7 @@ import com.prohor.personal.bobaFettBot.data.*;
 import com.prohor.personal.bobaFettBot.features.holidays.Holidays;
 import com.prohor.personal.bobaFettBot.features.holidays.HolidaysDistributor;
 import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
-import com.prohor.personal.bobaFettBot.features.holidays.commands.*;
+import com.prohor.personal.bobaFettBot.features.holidays.commands.HolidaysCommand;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.*;
 import com.prohor.personal.bobaFettBot.system.*;
 import org.json.JSONObject;
@@ -54,15 +54,16 @@ public class Main {
                             new CommandsList(),
                             new CancelCommand(),
                             new GetIdCommand(),
-                            new CustomHolidayCommand(),
-                            new ImportHolidaysCommand(),
-                            new SubscribeHolidaysCommand(),
-                            new GetHolidaysCommand()),
+                            new HolidaysCommand()),
                     new BotPrefixService<>(
                             ChooseCustomHolidayDateCallback.getInstance(),
                             CustomHolidayCallback.getInstance(),
                             SubscribeHolidaysCallback.getInstance(),
-                            GetHolidaysCallback.getInstance()),
+                            GetHolidaysCallback.getInstance(),
+                            SubscribeHolidaysInitCallback.getInstance(),
+                            CustomHolidayInitCallback.getInstance(),
+                            GetHolidaysInitCallback.getInstance(),
+                            ImportHolidaysInitCallback.getInstance()),
                     new BotPrefixService<>(
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
