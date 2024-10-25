@@ -15,12 +15,12 @@ import java.util.List;
 
 public class HolidaysCommand extends BotCommand {
     public HolidaysCommand() {
-        super("/holidays", "работа с праздниками");
+        super("/holidays", "праздники");
     }
 
     private static final String START_MESSAGE = "Выберите, что именно вы хотите сделать";
     private static final InlineKeyboardMarkup KEYBOARD = Keyboard.getColumnInlineKeyboard(
-            List.of("узнать какие праздники отмечают в определенный день",
+            List.of("узнать, какие праздники отмечают в определенный день",
                     "управление собственными праздниками",
                     "импортировать праздники из другого чата",
                     "ежедневная рассылка праздников"),

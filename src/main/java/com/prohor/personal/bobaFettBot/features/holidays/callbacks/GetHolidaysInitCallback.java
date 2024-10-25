@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import java.util.List;
 
 public class GetHolidaysInitCallback extends BotCallback {
-    public GetHolidaysInitCallback() {
+    private GetHolidaysInitCallback() {
         super("holidays.init-get");
     }
 

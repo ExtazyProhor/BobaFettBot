@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 public class ImportHolidaysInitCallback extends BotCallback {
-    public ImportHolidaysInitCallback() {
+    private ImportHolidaysInitCallback() {
         super("holidays.init-import");
     }
 

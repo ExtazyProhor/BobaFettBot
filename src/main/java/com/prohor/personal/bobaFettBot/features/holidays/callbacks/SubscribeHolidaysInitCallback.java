@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import java.time.LocalTime;
 
 public class SubscribeHolidaysInitCallback extends BotCallback {
-    public SubscribeHolidaysInitCallback() {
+    private SubscribeHolidaysInitCallback() {
         super("holidays.init-sub");
     }
 
