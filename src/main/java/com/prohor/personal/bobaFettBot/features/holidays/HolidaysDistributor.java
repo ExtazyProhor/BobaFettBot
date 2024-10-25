@@ -1,63 +1,43 @@
 package com.prohor.personal.bobaFettBot.features.holidays;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
-import com.prohor.personal.bobaFettBot.data.entities.CustomHoliday;
-import com.prohor.personal.bobaFettBot.data.entities.HolidaysSubscriber;
-import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
+import com.prohor.personal.bobaFettBot.data.entities.*;
+import com.prohor.personal.bobaFettBot.distribution.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil.getShortDateRepresentation;
+import static com.prohor.personal.bobaFettBot.distribution.DateTimeUtil.getShortDateRepresentation;
 
-public class HolidaysDistributor implements Runnable {
-    private static final int SECS_IN_15_MINUTES = 15 * 60;
-
-    private final Bot bot;
-    private final ExceptionWriter writer;
-
-    public HolidaysDistributor(Bot bot, ExceptionWriter writer) {
-        this.bot = bot;
-        this.writer = writer;
-        LocalTime now = DateTimeUtil.getTimeNow();
-        int initialDelay = SECS_IN_15_MINUTES - (now.getMinute() * 60 + now.getSecond()) % SECS_IN_15_MINUTES;
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(this, initialDelay, SECS_IN_15_MINUTES, TimeUnit.SECONDS);
-    }
-
+public class HolidaysDistributor implements DistributionTask {
     @Override
-    public void run() {
+    public void distribute(Bot bot, LocalTime roundedNow) throws Exception {
         HolidaysSubscriber atTime = new HolidaysSubscriber();
-        LocalTime roundedNow = getRoundedTime();
-        if (roundedNow.getHour() == 0 && roundedNow.getMinute() == 0)
-            Holidays.setToday(DateTimeUtil.getNow());
-        LocalDate today = Holidays.getToday();
+        LocalDate today = DateTimeUtil.getToday();
+        if (today.getDayOfYear() == 1 && roundedNow.getHour() == 0 && roundedNow.getMinute() == 0)
+            Holidays.updateYear(today);
         atTime.setDailyDistributionTime(roundedNow);
         atTime.setSubscriptionIsActive(true);
-        try {
-            List<Map<Long, List<String>>> usersCustomHolidays = getUsersCustomHolidays();
-            List<HolidaysSubscriber> subscribers = bot.storage.getAllByFields(atTime);
-            for (HolidaysSubscriber subscriber : subscribers) {
-                long chatId = subscriber.getChatId();
-                reminderAboutCustomHolidays(chatId, today, bot);
-                int indent = subscriber.getIndentationOfDays();
-                bot.sendMessage(SendMessage.builder()
-                        .chatId(chatId)
-                        .text(Holidays.getHolidaysMessage(usersCustomHolidays.get(indent).get(subscriber.getChatId()),
-                                today.plusDays(indent)))
-                        .build());
-            }
-        } catch (Exception e) {
-            writer.writeException(e);
+
+        List<Map<Long, List<String>>> usersCustomHolidays = getUsersCustomHolidays(bot);
+        List<HolidaysSubscriber> subscribers = bot.storage.getAllByFields(atTime);
+        for (HolidaysSubscriber subscriber : subscribers) {
+            long chatId = subscriber.getChatId();
+            reminderAboutCustomHolidays(chatId, today, bot);
+            int indent = subscriber.getIndentationOfDays();
+            bot.sendMessage(SendMessage.builder()
+                    .chatId(chatId)
+                    .text(Holidays.getHolidaysMessage(usersCustomHolidays.get(indent).get(subscriber.getChatId()),
+                            today.plusDays(indent)))
+                    .build());
         }
     }
 
     // List by indents < Map < chatId, List of holidays < String > > >
-    private List<Map<Long, List<String>>> getUsersCustomHolidays() throws Exception {
-        LocalDate today = Holidays.getToday();
+    private List<Map<Long, List<String>>> getUsersCustomHolidays(Bot bot) throws Exception {
+        LocalDate today = DateTimeUtil.getToday();
         List<Map<Long, List<String>>> list = new ArrayList<>();
 
         for (int i = 0; i < 3; ++i) {
@@ -84,15 +64,5 @@ public class HolidaysDistributor implements Runnable {
                         .collect(Collectors.joining("\n")))
                 .chatId(chatId)
                 .build());
-    }
-
-    private static LocalTime getRoundedTime() {
-        LocalTime now = DateTimeUtil.getTimeNow();
-        int minutes = now.getMinute();
-        int roundedMinutes = (int) (Math.round(minutes / 15.0) * 15) % 60;
-        int newHour = now.getHour();
-        if (roundedMinutes == 0 && minutes > 30)
-            newHour = (newHour + 1) % 24;
-        return LocalTime.of(newHour, roundedMinutes);
     }
 }

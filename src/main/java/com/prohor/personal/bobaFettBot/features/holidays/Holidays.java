@@ -1,5 +1,6 @@
 package com.prohor.personal.bobaFettBot.features.holidays;
 
+import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
 import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
 import org.json.*;
 
@@ -13,14 +14,13 @@ public final class Holidays {
     public static void init(File directory, ExceptionWriter exceptionWriter) {
         if (DIRECTORY != null)
             return;
-        TODAY = DateTimeUtil.getNow();
-        writer = exceptionWriter;
+        WRITER = exceptionWriter;
         DIRECTORY = new File(directory, "holidays");
         try {
-            CURRENT_YEAR_HOLIDAYS = loadHolidays(TODAY.getYear());
-            NEXT_YEAR_HOLIDAYS = loadHolidays(TODAY.getYear() + 1);
+            CURRENT_YEAR_HOLIDAYS = loadHolidays(DateTimeUtil.getToday().getYear());
+            NEXT_YEAR_HOLIDAYS = loadHolidays(DateTimeUtil.getToday().getYear() + 1);
         } catch (IOException e) {
-            writer.writeException(e);
+            WRITER.writeException(e);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -29,25 +29,19 @@ public final class Holidays {
     private Holidays() {
     }
 
-    private static ExceptionWriter writer;
+    private static ExceptionWriter WRITER;
     private static File DIRECTORY;
     private static JSONArray CURRENT_YEAR_HOLIDAYS;
     private static JSONArray NEXT_YEAR_HOLIDAYS;
-    private static LocalDate TODAY;
 
-    public static LocalDate getToday() {
-        return TODAY;
-    }
-
-    static void setToday(LocalDate today) {
-        TODAY = today;
+    static void updateYear(LocalDate today) {
         if (today.getDayOfYear() != 1)
             return;
         CURRENT_YEAR_HOLIDAYS = NEXT_YEAR_HOLIDAYS;
         try {
             NEXT_YEAR_HOLIDAYS = loadHolidays(today.getYear());
         } catch (IOException e) {
-            writer.writeException(e);
+            WRITER.writeException(e);
             System.exit(-1);
         }
     }
@@ -57,7 +51,7 @@ public final class Holidays {
 
     private static HolidayData getHolidays(LocalDate date) {
         JSONArray holidays;
-        if (date.getYear() == TODAY.getYear())
+        if (date.getYear() == DateTimeUtil.getToday().getYear())
             holidays = CURRENT_YEAR_HOLIDAYS;
         else
             holidays = NEXT_YEAR_HOLIDAYS;

@@ -1,4 +1,4 @@
-package com.prohor.personal.bobaFettBot.features.holidays;
+package com.prohor.personal.bobaFettBot.distribution;
 
 import java.time.*;
 import java.time.format.*;
@@ -27,7 +27,17 @@ public final class DateTimeUtil {
         return shortDateRepresentation % 100 + " " + getRussianMonthNameInDate(shortDateRepresentation);
     }
 
-    public static LocalDate getNow() {
+    private static LocalDate TODAY = getDateNow();
+
+    public static LocalDate getToday() {
+        return TODAY;
+    }
+
+    static void setToday(LocalDate today) {
+        TODAY = today;
+    }
+
+    public static LocalDate getDateNow() {
         return LocalDate.now(MOSCOW_ZONE);
     }
 

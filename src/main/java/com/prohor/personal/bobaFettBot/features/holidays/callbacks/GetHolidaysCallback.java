@@ -4,7 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.CustomHoliday;
-import com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil;
+import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
 import com.prohor.personal.bobaFettBot.features.holidays.Holidays;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -31,12 +31,12 @@ public class GetHolidaysCallback extends BotCallback {
         String callback = getSuffix(callbackQuery);
         long chatId = callbackQuery.getMessage().getChatId();
         int messageId = callbackQuery.getMessage().getMessageId();
-        LocalDate today = Holidays.getToday();
+        LocalDate today = DateTimeUtil.getToday();
         switch (callback) {
             case "tod" -> sendHolidays(messageId, chatId, today, bot);
             case "tom" -> sendHolidays(messageId, chatId, today.plusDays(1), bot);
             case "aft" -> sendHolidays(messageId, chatId, today.plusDays(2), bot);
-            case "oth" -> chooseDate(messageId, chatId, Holidays.getToday().withYear(2024), bot);
+            case "oth" -> chooseDate(messageId, chatId, today.withYear(2024), bot);
             default -> {
                 LocalDate date = LocalDate.parse(callback.substring(0, callback.indexOf('.')));
                 date = fixDate(date);
@@ -94,7 +94,7 @@ public class GetHolidaysCallback extends BotCallback {
     }
 
     private LocalDate fixDate(LocalDate date) {
-        int thisYear = Holidays.getToday().getYear();
+        int thisYear = DateTimeUtil.getToday().getYear();
         if (date.getYear() > thisYear + 1)
             return date.withYear(thisYear + 1);
         if (date.getYear() < thisYear)

@@ -4,7 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
-import com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil;
+import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitCustomHolidayName;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;

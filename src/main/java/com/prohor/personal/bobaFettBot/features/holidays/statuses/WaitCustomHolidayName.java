@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDate;
 
-import static com.prohor.personal.bobaFettBot.features.holidays.DateTimeUtil.getShortDateRepresentation;
+import static com.prohor.personal.bobaFettBot.distribution.DateTimeUtil.getShortDateRepresentation;
 
 public class WaitCustomHolidayName extends BotStatus {
     private WaitCustomHolidayName() {
