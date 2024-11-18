@@ -3,10 +3,7 @@ package com.prohor.personal.bobaFettBot.features.holidays.commands;
 import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCommand;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.CustomHolidayInitCallback;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.GetHolidaysInitCallback;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.ImportHolidaysInitCallback;
-import com.prohor.personal.bobaFettBot.features.holidays.callbacks.SubscribeHolidaysInitCallback;
+import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -18,9 +15,9 @@ public class HolidaysCommand extends BotCommand {
         super("/holidays", "праздники");
     }
 
-    private static final String START_MESSAGE = "Выберите, что именно вы хотите сделать";
+    private static final String START_MESSAGE = "Выберите действие";
     private static final InlineKeyboardMarkup KEYBOARD = Keyboard.getColumnInlineKeyboard(
-            List.of("узнать, какие праздники отмечают в определенный день",
+            List.of("узнать праздники в определенный день",
                     "управление собственными праздниками",
                     "импортировать праздники из другого чата",
                     "ежедневная рассылка праздников"),

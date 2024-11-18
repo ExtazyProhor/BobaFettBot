@@ -1,7 +1,7 @@
 CREATE TABLE users (
     chat_id BIGINT PRIMARY KEY,
     chat_type VARCHAR(10) NOT NULL CHECK (chat_type IN ('private', 'channel', 'group', 'supergroup')),
-    chat_name VARCHAR(128) NOT NULL,
+    chat_name VARCHAR(128),
     user_link VARCHAR(33)
 );
 

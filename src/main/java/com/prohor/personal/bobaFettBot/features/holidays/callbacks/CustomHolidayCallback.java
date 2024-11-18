@@ -5,7 +5,6 @@ import com.prohor.personal.bobaFettBot.bot.Keyboard;
 import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
 import com.prohor.personal.bobaFettBot.data.entities.CustomHoliday;
 import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
-import com.prohor.personal.bobaFettBot.features.holidays.Holidays;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -93,7 +92,8 @@ public class CustomHolidayCallback extends BotCallback {
             hasNotHolidays(chatId, messageId, bot);
             return;
         }
-        customHolidays.sort(Comparator.comparingLong(CustomHoliday::getCustomHolidayId));
+        customHolidays.sort(Comparator.comparingInt(CustomHoliday::getHolidayDate)
+                .thenComparingLong(CustomHoliday::getCustomHolidayId));
         int totalPages = customHolidays.size() / PER_PAGE + (customHolidays.size() % PER_PAGE == 0 ? 0 : 1);
         if (page >= totalPages)
             page = 0;
@@ -135,7 +135,8 @@ public class CustomHolidayCallback extends BotCallback {
             hasNotHolidays(chatId, messageId, bot);
             return;
         }
-        customHolidays.sort(Comparator.comparingLong(CustomHoliday::getCustomHolidayId));
+        customHolidays.sort(Comparator.comparingInt(CustomHoliday::getHolidayDate)
+                .thenComparingLong(CustomHoliday::getCustomHolidayId));
         int totalPages = customHolidays.size() / PER_PAGE + (customHolidays.size() % PER_PAGE == 0 ? 0 : 1);
         if (page >= totalPages)
             page = 0;

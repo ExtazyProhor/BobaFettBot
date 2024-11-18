@@ -17,8 +17,10 @@ public class StartCommand extends BotCommand {
         long chatId = chat.getId();
         String name = chat.isUserChat() ? chat.getFirstName() : chat.getTitle();
         if (!bot.storage.contains(User.class, chatId))
-            if (chat.isUserChat())
+            if (chat.isUserChat() && chat.getUserName() != null)
                 bot.storage.create(new User(chatId, chat.getType(), name, "@" + chat.getUserName()));
+            else if (chat.isUserChat() && chat.getUserName() == null)
+                bot.storage.create(new User(chatId, chat.getType(), name));
             else
                 bot.storage.create(new User(chatId, chat.getType(), name));
         bot.sendMessage(SendMessage.builder()
