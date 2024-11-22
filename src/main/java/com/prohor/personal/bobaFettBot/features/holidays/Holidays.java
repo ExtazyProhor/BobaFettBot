@@ -1,8 +1,8 @@
 package com.prohor.personal.bobaFettBot.features.holidays;
 
-import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
-import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
+import com.prohor.personal.bobaFettBot.distribution.*;
 import org.json.*;
+import org.slf4j.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -11,16 +11,17 @@ import java.util.*;
 import java.util.stream.*;
 
 public final class Holidays {
-    public static void init(File directory, ExceptionWriter exceptionWriter) {
+    private static final Logger log = LoggerFactory.getLogger(Holidays.class);
+
+    public static void init(File directory) {
         if (DIRECTORY != null)
             return;
-        WRITER = exceptionWriter;
         DIRECTORY = new File(directory, "holidays");
         try {
             CURRENT_YEAR_HOLIDAYS = loadHolidays(DateTimeUtil.getToday().getYear());
             NEXT_YEAR_HOLIDAYS = loadHolidays(DateTimeUtil.getToday().getYear() + 1);
         } catch (IOException e) {
-            WRITER.writeException(e);
+            log.error("error initialization holidays", e);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -29,7 +30,6 @@ public final class Holidays {
     private Holidays() {
     }
 
-    private static ExceptionWriter WRITER;
     private static File DIRECTORY;
     private static JSONArray CURRENT_YEAR_HOLIDAYS;
     private static JSONArray NEXT_YEAR_HOLIDAYS;
@@ -41,7 +41,7 @@ public final class Holidays {
         try {
             NEXT_YEAR_HOLIDAYS = loadHolidays(today.getYear());
         } catch (IOException e) {
-            WRITER.writeException(e);
+            log.error("error in year update", e);
             System.exit(-1);
         }
     }

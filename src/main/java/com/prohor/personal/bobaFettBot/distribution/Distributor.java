@@ -1,22 +1,21 @@
 package com.prohor.personal.bobaFettBot.distribution;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
-import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
+import org.slf4j.*;
 
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class Distributor implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(Distributor.class);
     private static final int SECS_IN_15_MINUTES = 15 * 60;
 
     private final List<DistributionTask> tasksList;
     private final Bot bot;
-    private final ExceptionWriter writer;
 
-    public Distributor(Bot bot, ExceptionWriter writer, DistributionTask... tasks) {
+    public Distributor(Bot bot, DistributionTask... tasks) {
         this.bot = bot;
-        this.writer = writer;
         this.tasksList = Arrays.asList(tasks);
 
         LocalTime now = DateTimeUtil.getTimeNow();
@@ -34,7 +33,7 @@ public class Distributor implements Runnable {
             try {
                 task.distribute(bot, roundedNow);
             } catch (Exception e) {
-                writer.writeException(e);
+                log.error("error with distribution task", e);
             }
         }
     }

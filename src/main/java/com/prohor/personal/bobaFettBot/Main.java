@@ -9,7 +9,6 @@ import com.prohor.personal.bobaFettBot.features.holidays.*;
 import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
 import com.prohor.personal.bobaFettBot.features.holidays.commands.HolidaysCommand;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.*;
-import com.prohor.personal.bobaFettBot.system.*;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -32,7 +31,6 @@ public class Main {
         File directory = path.contains(".jar") ?
                 new File(path).getParentFile() :
                 new File("files/private");
-        ExceptionWriter exceptionWriter = new LogWriter(directory);
 
         try {
             JSONObject tokens = new JSONObject(Files.readString(Paths.get(directory.toURI()).resolve("tokens.json")));
@@ -68,16 +66,14 @@ public class Main {
                     new BotPrefixService<>(
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
-                    new PostgresDataStorage(connectionPool),
-                    exceptionWriter);
+                    new PostgresDataStorage(connectionPool));
             telegramBotsApi.registerBot(bot);
 
-            Holidays.init(directory, exceptionWriter);
-            new Distributor(bot, exceptionWriter,
-                    new HolidaysDistributor());
+            Holidays.init(directory);
+            new Distributor(bot, new HolidaysDistributor());
 
         } catch (Exception e) {
-            exceptionWriter.writeException(e);
+            e.printStackTrace();
         }
     }
 }

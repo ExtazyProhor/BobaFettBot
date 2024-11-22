@@ -4,7 +4,7 @@ import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
 import com.prohor.personal.bobaFettBot.data.entities.User;
 import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
-import com.prohor.personal.bobaFettBot.system.ExceptionWriter;
+import org.slf4j.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -16,6 +16,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.*;
 
 public class Bot extends TelegramLongPollingBot {
+    private static final Logger log = LoggerFactory.getLogger(Bot.class);
+
     private final BotService<String, BotCommand> commandService;
     private final BotPrefixService<BotCallback> callbackService;
     private final BotPrefixService<BotStatus> statusService;
@@ -24,24 +26,22 @@ public class Bot extends TelegramLongPollingBot {
     public final Set<Long> usersWithStatus;
 
     private final String username;
-    private final ExceptionWriter exceptionWriter;
 
     public Bot(String token, String username,
                BotService<String, BotCommand> commandService,
                BotPrefixService<BotCallback> callbackService,
                BotPrefixService<BotStatus> statusService,
-               DataStorage storage,
-               ExceptionWriter exceptionWriter) throws Exception {
+               DataStorage storage) throws Exception {
         super(token);
         this.username = username;
         this.commandService = commandService;
         this.callbackService = callbackService;
         this.statusService = statusService;
         this.storage = storage;
-        this.exceptionWriter = exceptionWriter;
 
         this.usersWithStatus = new HashSet<>();
         this.usersWithStatus.addAll(storage.getAll(UserStatus.class).stream().map(UserStatus::getChatId).toList());
+        log.info("{} created", username);
     }
 
     @Override
@@ -71,11 +71,12 @@ public class Bot extends TelegramLongPollingBot {
             else if (update.hasMyChatMember())
                 hasMyChatMember(update);
         } catch (Exception e) {
-            exceptionWriter.writeException(e);
+            log.error("error in update", e);
         }
     }
 
     public final void sendMessage(SendMessage message) throws Exception {
+        log.trace("send message: {}", message);
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -84,6 +85,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public final void editMessageText(EditMessageText editMessageText) throws Exception {
+        log.trace("edit message: {}", editMessageText);
         try {
             execute(editMessageText);
         } catch (TelegramApiException e) {
@@ -104,6 +106,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void hasMessage(Update update) throws Exception {
+        log.trace("update has message: {}", update);
         if (update.getMessage().getChat().isChannelChat())
             return;
         String message = update.getMessage().getText().trim();
@@ -115,19 +118,28 @@ public class Bot extends TelegramLongPollingBot {
                 return;
             message = message.substring(0, message.indexOf('@'));
         }
+        log.trace("message: \"{}\"", message);
         if (commandService.hasTask(message))
             commandService.getTask(message).executeCommand(update.getMessage(), this);
+        else
+            log.trace("unknown command: {}", message);
     }
 
     private void hasCallback(Update update) throws Exception {
-        if (!callbackService.hasTask(update.getCallbackQuery().getData())) return;
-        callbackService.getTask(update.getCallbackQuery().getData()).callbackReceived(update.getCallbackQuery(), this);
+        String callbackData = update.getCallbackQuery().getData();
+        if (!callbackService.hasTask(callbackData)) {
+            log.warn("unknown callback: {}", callbackData);
+            return;
+        }
+        log.trace("callback: \"{}\"", callbackData);
+        callbackService.getTask(callbackData).callbackReceived(update.getCallbackQuery(), this);
     }
 
     private void hasMyChatMember(Update update) throws Exception {
         long chatId = update.getMyChatMember().getChat().getId();
         ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
         Chat chat = update.getMyChatMember().getChat();
+        log.trace("new chat member: {}", newChatMember);
 
         if (!storage.contains(User.class, chatId))
             storage.create(new User(chatId, chat.getType(), chat.getTitle()));

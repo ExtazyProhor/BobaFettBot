@@ -1,9 +1,13 @@
 package com.prohor.personal.bobaFettBot.data;
 
+import org.slf4j.*;
+
 import java.sql.*;
 import java.util.*;
 
 public class ConnectionPool {
+    private static final Logger log = LoggerFactory.getLogger(ConnectionPool.class);
+
     private final LinkedList<Connection> availableConnections;
     private final Map<Connection, Long> creationTime;
     private final long secondsToLive;
@@ -21,6 +25,7 @@ public class ConnectionPool {
         this.secondsToLive = secondsToLive;
         availableConnections = new LinkedList<>();
         creationTime = new HashMap<>();
+        log.info("initialized connections pool(url={}, max={}, secondsToLive={})", url, maxConnections, secondsToLive);
         initializePool();
     }
 
@@ -32,6 +37,8 @@ public class ConnectionPool {
 
     private Connection createConnection() throws SQLException {
         Connection connection = DriverManager.getConnection(url, user, password);
+        log.trace("pool size before creation: {}", availableConnections.size());
+        log.trace("create new connection");
         creationTime.put(connection, System.currentTimeMillis() / 1000);
         return connection;
     }
@@ -43,19 +50,24 @@ public class ConnectionPool {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (availableConnections.isEmpty())
+            if (availableConnections.isEmpty()) {
+                log.trace("get new created connection");
                 return createConnection();
+            }
         }
+        log.trace("get existing connection");
         return availableConnections.removeFirst();
     }
 
     public synchronized void releaseConnection(Connection connection) throws SQLException {
         if (creationTime.containsKey(connection) &&
                 creationTime.get(connection) + secondsToLive > System.currentTimeMillis() / 1000 &&
-                availableConnections.size() < maxConnections)
+                availableConnections.size() < maxConnections) {
             availableConnections.addLast(connection);
-        else {
+            log.trace("released connection saved");
+        } else {
             connection.close();
+            log.trace("released connection close");
             if (availableConnections.size() < maxConnections)
                 availableConnections.add(createConnection());
         }
