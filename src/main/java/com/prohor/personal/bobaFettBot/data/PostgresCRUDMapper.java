@@ -1,6 +1,7 @@
 package com.prohor.personal.bobaFettBot.data;
 
 import com.prohor.personal.bobaFettBot.data.mapping.*;
+import org.slf4j.*;
 
 import java.lang.reflect.*;
 import java.sql.*;
@@ -9,38 +10,23 @@ import java.util.*;
 import java.util.stream.*;
 
 public class PostgresCRUDMapper {
+    private static final Logger log = LoggerFactory.getLogger(PostgresCRUDMapper.class);
+
     public static <T extends Entity> boolean contains(Connection connection, Class<T> clazz, Object primaryKey)
             throws SQLException {
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
-            String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(clazz) + " WHERE " +
-                    getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
-
+        String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(clazz) + " WHERE " +
+                getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             return resultSet.next() && resultSet.getInt(1) == 1;
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
     }
 
     public static <T extends Entity> boolean containsByFields(Connection connection, T entity) throws SQLException {
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
-            String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             return resultSet.next() && resultSet.getInt(1) > 0;
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
     }
 
@@ -49,53 +35,35 @@ public class PostgresCRUDMapper {
         try (Statement statement = connection.createStatement()) {
             String sql = "DELETE FROM " + getTableName(clazz) + " WHERE " +
                     getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
-            statement.execute(sql);
+            executeSQL(statement, sql);
         }
     }
 
 
     public static <T extends Entity> T get(Connection connection, Class<T> clazz, Object primaryKey)
             throws SQLException {
-
-        Statement statement = null;
-        ResultSet resultSet = null;
-
-        try {
-            String sqlQuery = "SELECT * FROM " + getTableName(clazz) + " WHERE " +
-                    getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        String sqlQuery = "SELECT * FROM " + getTableName(clazz) + " WHERE " +
+                getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             if (resultSet.next())
                 return createEntityFromResultSet(clazz, resultSet);
             throw new MappingException("entity with specified primary key does not exist");
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends Entity> T getOneByFields(Connection connection, T entity) throws SQLException {
         T t;
+        String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
 
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
-            String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             if (resultSet.next())
                 t = (T) createEntityFromResultSet(entity.getClass(), resultSet);
             else
                 throw new MappingException("there are no entities in database that have a field " +
                         "with the specified value");
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
         return t;
     }
@@ -103,62 +71,37 @@ public class PostgresCRUDMapper {
     @SuppressWarnings("unchecked")
     public static <T extends Entity> List<T> getAllByFields(Connection connection, T entity) throws SQLException {
         List<T> list = new ArrayList<>();
+        String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
 
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
-            String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             while (resultSet.next())
                 list.add((T) createEntityFromResultSet(entity.getClass(), resultSet));
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
         return list;
     }
 
     public static <T extends Entity> List<T> getAll(Connection connection, Class<T> clazz)
             throws SQLException {
-        Statement statement = null;
-        ResultSet resultSet = null;
-
-        try {
-            List<T> entities = new ArrayList<>();
-            String sqlQuery = "SELECT * FROM " + getTableName(clazz) + ";";
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        List<T> entities = new ArrayList<>();
+        String sqlQuery = "SELECT * FROM " + getTableName(clazz) + ";";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             while (resultSet.next()) {
                 entities.add(createEntityFromResultSet(clazz, resultSet));
             }
-            return entities;
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
+        return entities;
     }
 
     public static <T extends Entity> int countByFields(Connection connection, T entity) throws SQLException {
-        Statement statement = null;
-        ResultSet resultSet = null;
-        try {
-            String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(sqlQuery);
+        String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
             if (resultSet.next())
                 return resultSet.getInt(1);
-            return 0;
-        } finally {
-            if (statement != null)
-                statement.close();
-            if (resultSet != null)
-                resultSet.close();
         }
+        return 0;
     }
 
     public static <T extends Entity> void create(Connection connection, T entity) throws SQLException {
@@ -193,7 +136,7 @@ public class PostgresCRUDMapper {
             command.setLength(command.length() - 2);
             command.append(") VALUES (").append(values).append(");");
 
-            statement.execute(command.toString());
+            executeSQL(statement, command.toString());
         }
     }
 
@@ -237,7 +180,7 @@ public class PostgresCRUDMapper {
                     " = " +
                     getPrimaryKey(entity) +
                     ";";
-            statement.execute(sql);
+            executeSQL(statement, sql);
         }
     }
 
@@ -347,5 +290,15 @@ public class PostgresCRUDMapper {
             }
         }
         return entity;
+    }
+
+    private static void executeSQL(Statement statement, String sql) throws SQLException {
+        log.debug("sql executing: {}", sql);
+        statement.execute(sql);
+    }
+
+    private static ResultSet executeSQLQuery(Statement statement, String sql) throws SQLException {
+        log.debug("sql query: {}", sql);
+        return statement.executeQuery(sql);
     }
 }
