@@ -167,7 +167,7 @@ public class PostgresCRUDMapper {
                 }
             }
             if (map.size() == 0)
-                throw new MappingException("entities are identical");
+                return;
 
             String sql = "UPDATE " +
                     getTableName(entity.getClass()) +

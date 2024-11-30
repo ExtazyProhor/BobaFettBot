@@ -46,9 +46,7 @@ public class SubscribeHolidaysCallback extends BotCallback {
                     case "time" -> settingSubscription(time, indent, chatId, messageId, bot);
                     case "confirm" -> {
                         HolidaysSubscriber subscriber = new HolidaysSubscriber(chatId, time, (short) indent, true);
-                        HolidaysSubscriber oldSubscriber = bot.storage.get(HolidaysSubscriber.class, chatId);
-                        if (!oldSubscriber.equals(subscriber))
-                            bot.storage.update(subscriber);
+                        bot.storage.update(subscriber);
                         bot.editMessageText(EditMessageText.builder()
                                 .text("Настройки успешно применены. В " + time + " каждый день будет приходить " +
                                         "список праздников " + INDENT_TEXT[indent])
