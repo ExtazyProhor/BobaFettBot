@@ -298,7 +298,7 @@ public class PostgresCRUDMapper {
     }
 
     private static ResultSet executeSQLQuery(Statement statement, String sql) throws SQLException {
-        log.debug("sql query: {}", sql);
+        log.trace("sql query: {}", sql);
         return statement.executeQuery(sql);
     }
 }

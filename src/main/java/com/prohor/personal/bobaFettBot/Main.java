@@ -37,12 +37,6 @@ public class Main {
             JSONObject botTokens = tokens.getJSONObject("bot-info");
             JSONObject databaseTokens = tokens.getJSONObject("database-info");
 
-            ConnectionPool connectionPool = new ConnectionPool(
-                    databaseTokens.getString("url"),
-                    databaseTokens.getString("username"),
-                    databaseTokens.getString("password"),
-                    5, 1800);
-
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             Bot bot = new Bot(
                     botTokens.getString("token"),
@@ -66,7 +60,10 @@ public class Main {
                     new BotPrefixService<>(
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
-                    new PostgresDataStorage(connectionPool));
+                    new PostgresDataStorage(
+                            databaseTokens.getString("url"),
+                            databaseTokens.getString("username"),
+                            databaseTokens.getString("password")));
             telegramBotsApi.registerBot(bot);
 
             Holidays.init(directory);

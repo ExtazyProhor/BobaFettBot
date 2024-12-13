@@ -2,8 +2,7 @@ package com.prohor.personal.bobaFettBot.bot;
 
 import com.prohor.personal.bobaFettBot.bot.objects.*;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
-import com.prohor.personal.bobaFettBot.data.entities.User;
-import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
+import com.prohor.personal.bobaFettBot.data.entities.*;
 import org.slf4j.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -51,12 +50,14 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public final void onUpdateReceived(Update update) {
+        log.trace("update received: {}", update);
         try {
             Long chatId = null;
             if (update.hasMessage())
                 chatId = update.getMessage().getChatId();
             else if (update.hasCallbackQuery())
                 chatId = update.getCallbackQuery().getMessage().getChatId();
+
             if (chatId != null && usersWithStatus.contains(chatId)) {
                 String status = storage.get(UserStatus.class, chatId).getStatus();
                 if (statusService.hasTask(status))
@@ -75,8 +76,26 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    private String lineText(String text) {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < text.length(); ++i) {
+            switch (text.charAt(i)) {
+                case '\n' -> builder.append("\\n");
+                case '\\' -> builder.append("\\\\");
+                case '\r' -> builder.append("\\r");
+                case '\t' -> builder.append("\\t");
+                case '\f' -> builder.append("\\f");
+                case '\b' -> builder.append("\\b");
+                default -> builder.append(text.charAt(i));
+            }
+        }
+        return builder.toString();
+    }
+
     public final void sendMessage(SendMessage message) throws Exception {
-        log.trace("send message: {}", message);
+        log.trace("send message: {chatId={}, text={}}",
+                message.getChatId(),
+                lineText(message.getText()));
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -84,14 +103,17 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    public final void editMessageText(EditMessageText editMessageText) throws Exception {
-        log.trace("edit message: {}", editMessageText);
+    public final void editMessageText(EditMessageText message) throws Exception {
+        log.trace("edit message: {chatId={}, messageId={}, text={}}",
+                message.getChatId(),
+                message.getMessageId(),
+                lineText(message.getText()));
         try {
-            execute(editMessageText);
+            execute(message);
         } catch (TelegramApiException e) {
             if (e.getMessage().contains("message is not modified"))
                 return;
-            checkException(e, editMessageText.getChatId());
+            checkException(e, message.getChatId());
         }
     }
 
@@ -106,7 +128,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void hasMessage(Update update) throws Exception {
-        log.trace("update has message: {}", update);
         if (update.getMessage().getChat().isChannelChat())
             return;
         String message = update.getMessage().getText().trim();
@@ -118,7 +139,7 @@ public class Bot extends TelegramLongPollingBot {
                 return;
             message = message.substring(0, message.indexOf('@'));
         }
-        log.trace("message: \"{}\"", message);
+        log.trace("message received: \"{}\"", message);
         if (commandService.hasTask(message))
             commandService.getTask(message).executeCommand(update.getMessage(), this);
         else
