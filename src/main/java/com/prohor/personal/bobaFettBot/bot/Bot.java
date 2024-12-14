@@ -50,7 +50,6 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public final void onUpdateReceived(Update update) {
-        log.trace("update received: {}", update);
         try {
             Long chatId = null;
             if (update.hasMessage())
@@ -152,7 +151,7 @@ public class Bot extends TelegramLongPollingBot {
             log.warn("unknown callback: {}", callbackData);
             return;
         }
-        log.trace("callback: \"{}\"", callbackData);
+        log.trace("callback received: \"{}\"", callbackData);
         callbackService.getTask(callbackData).callbackReceived(update.getCallbackQuery(), this);
     }
 
