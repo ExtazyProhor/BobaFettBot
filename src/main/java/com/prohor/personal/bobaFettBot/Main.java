@@ -3,12 +3,14 @@ package com.prohor.personal.bobaFettBot;
 import com.prohor.personal.bobaFettBot.bot.Bot;
 import com.prohor.personal.bobaFettBot.bot.commands.*;
 import com.prohor.personal.bobaFettBot.bot.objects.*;
+import com.prohor.personal.bobaFettBot.bot.statuses.WaitNotifyMessage;
 import com.prohor.personal.bobaFettBot.data.*;
 import com.prohor.personal.bobaFettBot.distribution.Distributor;
 import com.prohor.personal.bobaFettBot.features.holidays.*;
 import com.prohor.personal.bobaFettBot.features.holidays.callbacks.*;
 import com.prohor.personal.bobaFettBot.features.holidays.commands.HolidaysCommand;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.*;
+import com.prohor.personal.bobaFettBot.util.AdminUtils;
 import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -36,6 +38,12 @@ public class Main {
             JSONObject tokens = new JSONObject(Files.readString(Paths.get(directory.toURI()).resolve("tokens.json")));
             JSONObject botTokens = tokens.getJSONObject("bot-info");
             JSONObject databaseTokens = tokens.getJSONObject("database-info");
+            tokens.getJSONObject("admins-info").getJSONArray("admins-ids").forEach(id -> {
+                if (id instanceof Long l)
+                    AdminUtils.addAdmin(l);
+                else if (id instanceof Integer i)
+                    AdminUtils.addAdmin(i);
+            });
 
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             Bot bot = new Bot(
@@ -46,6 +54,7 @@ public class Main {
                             new CommandsList(),
                             new CancelCommand(),
                             new GetIdCommand(),
+                            new NotifyCommand(),
 
                             new HolidaysCommand()),
                     new BotPrefixService<>(
@@ -58,6 +67,7 @@ public class Main {
                             GetHolidaysInitCallback.getInstance(),
                             ImportHolidaysInitCallback.getInstance()),
                     new BotPrefixService<>(
+                            WaitNotifyMessage.getInstance(),
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
                     new PostgresDataStorage(

@@ -12,6 +12,6 @@ public class CancelCommand extends BotCommand {
 
     @Override
     public void executeCommand(Message message, Bot bot) throws Exception {
-        bot.sendMessage(SendMessage.builder().text("Отменять нечего") .chatId(message.getChatId()).build());
+        bot.sendMessage(SendMessage.builder().text("Отменять нечего").chatId(message.getChatId()).build());
     }
 }

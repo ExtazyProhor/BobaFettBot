@@ -77,7 +77,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private String lineText(String text) {
         StringBuilder builder = new StringBuilder();
-        for(int i = 0; i < text.length(); ++i) {
+        for (int i = 0; i < text.length(); ++i) {
             switch (text.charAt(i)) {
                 case '\n' -> builder.append("\\n");
                 case '\\' -> builder.append("\\\\");
