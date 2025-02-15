@@ -1,18 +1,28 @@
 package com.prohor.personal.bobaFettBot.bot;
 
-import com.prohor.personal.bobaFettBot.bot.objects.*;
+import com.prohor.personal.bobaFettBot.bot.objects.BotCallback;
+import com.prohor.personal.bobaFettBot.bot.objects.BotCommand;
+import com.prohor.personal.bobaFettBot.bot.objects.BotPrefixService;
+import com.prohor.personal.bobaFettBot.bot.objects.BotService;
+import com.prohor.personal.bobaFettBot.bot.objects.BotStatus;
 import com.prohor.personal.bobaFettBot.data.DataStorage;
-import com.prohor.personal.bobaFettBot.data.entities.*;
-import org.slf4j.*;
+import com.prohor.personal.bobaFettBot.data.entities.User;
+import com.prohor.personal.bobaFettBot.data.entities.UserStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.chatmember.*;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberBanned;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberLeft;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Bot extends TelegramLongPollingBot {
     private static final Logger log = LoggerFactory.getLogger(Bot.class);
@@ -148,7 +158,7 @@ public class Bot extends TelegramLongPollingBot {
     private void hasCallback(Update update) throws Exception {
         String callbackData = update.getCallbackQuery().getData();
         if (!callbackService.hasTask(callbackData)) {
-            log.warn("unknown callback: {}", callbackData);
+            log.trace("unknown callback: {}", callbackData);
             return;
         }
         log.trace("callback received: \"{}\"", callbackData);

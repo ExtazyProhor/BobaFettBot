@@ -1,23 +1,35 @@
 package com.prohor.personal.bobaFettBot.data;
 
 import com.prohor.personal.bobaFettBot.data.mapping.Entity;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
 public class PostgresDataStorage implements DataStorage {
-    private final String url;
-    private final String user;
-    private final String password;
+    private static final Logger log = LoggerFactory.getLogger(PostgresDataStorage.class);
+    private final HikariDataSource dataSource;
 
     public PostgresDataStorage(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(user);
+        config.setPassword(password);
+        config.setMaximumPoolSize(5);
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(30_000);
+        config.setMaxLifetime(600_000);
+        config.setConnectionTimeout(5_000);
+        dataSource = new HikariDataSource(config);
     }
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        log.trace("getting connection");
+        return dataSource.getConnection();
     }
 
     @Override

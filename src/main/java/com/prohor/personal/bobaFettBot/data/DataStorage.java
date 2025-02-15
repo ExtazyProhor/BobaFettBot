@@ -4,7 +4,6 @@ import com.prohor.personal.bobaFettBot.data.mapping.Entity;
 
 import java.util.List;
 
-
 public interface DataStorage {
     <T extends Entity> boolean contains(Class<T> clazz, Object primaryKey) throws Exception;
 

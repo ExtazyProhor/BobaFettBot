@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
 
 public class SubscribeHolidaysCallback extends BotCallback {
     private SubscribeHolidaysCallback() {
@@ -67,7 +67,8 @@ public class SubscribeHolidaysCallback extends BotCallback {
     private static final String[] INDENT_TEXT = {"того же дня", "следующего дня", "после-следующего дня"};
 
     public void settingSubscription(LocalTime time, int indent, long chatId, int messageId, Bot bot)
-            throws Exception {
+            throws Exception
+    {
 
         InlineKeyboardMarkup keyboardMarkup = Keyboard.getInlineKeyboard(
                 List.of(

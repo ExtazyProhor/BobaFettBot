@@ -1,9 +1,17 @@
 package com.prohor.personal.bobaFettBot.data.entities;
 
-import com.prohor.personal.bobaFettBot.data.mapping.*;
-import lombok.*;
+import com.prohor.personal.bobaFettBot.data.mapping.Entity;
+import com.prohor.personal.bobaFettBot.data.mapping.EntityField;
+import com.prohor.personal.bobaFettBot.data.mapping.PrimaryKey;
+import com.prohor.personal.bobaFettBot.data.mapping.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.time.*;
+import java.time.LocalTime;
 
 @NoArgsConstructor
 @AllArgsConstructor

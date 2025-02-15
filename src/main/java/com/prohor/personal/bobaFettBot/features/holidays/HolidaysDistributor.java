@@ -1,15 +1,19 @@
 package com.prohor.personal.bobaFettBot.features.holidays;
 
 import com.prohor.personal.bobaFettBot.bot.Bot;
-import com.prohor.personal.bobaFettBot.data.entities.*;
-import com.prohor.personal.bobaFettBot.distribution.*;
+import com.prohor.personal.bobaFettBot.data.entities.CustomHoliday;
+import com.prohor.personal.bobaFettBot.data.entities.HolidaysSubscriber;
+import com.prohor.personal.bobaFettBot.distribution.DateTimeUtil;
+import com.prohor.personal.bobaFettBot.distribution.DistributionTask;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.prohor.personal.bobaFettBot.distribution.DateTimeUtil.getShortDateRepresentation;
 
 public class HolidaysDistributor implements DistributionTask {
     @Override
@@ -42,7 +46,7 @@ public class HolidaysDistributor implements DistributionTask {
 
         for (int i = 0; i < 3; ++i) {
             List<CustomHoliday> customHolidays = bot.storage.getAllByFields(
-                    new CustomHoliday(getShortDateRepresentation(today.plusDays(i))));
+                    new CustomHoliday(DateTimeUtil.getShortDateRepresentation(today.plusDays(i))));
             Map<Long, List<String>> map = new HashMap<>();
             for (CustomHoliday customHoliday : customHolidays) {
                 if (!map.containsKey(customHoliday.getChatId()))

@@ -9,10 +9,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
-import static com.prohor.personal.bobaFettBot.distribution.DateTimeUtil.*;
-
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class CustomHolidayCallback extends BotCallback {
     private CustomHolidayCallback() {
@@ -52,7 +52,7 @@ public class CustomHolidayCallback extends BotCallback {
     }
 
     private static String getCustomHolidayDescription(CustomHoliday holiday) {
-        return getRussianDate(holiday.getHolidayDate()) + " " + holiday.getHolidayName();
+        return DateTimeUtil.getRussianDate(holiday.getHolidayDate()) + " " + holiday.getHolidayName();
     }
 
     private static CustomHolidayCallback instance;

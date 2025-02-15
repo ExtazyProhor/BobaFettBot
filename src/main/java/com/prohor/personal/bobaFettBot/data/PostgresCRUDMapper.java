@@ -1,23 +1,40 @@
 package com.prohor.personal.bobaFettBot.data;
 
-import com.prohor.personal.bobaFettBot.data.mapping.*;
-import org.slf4j.*;
+import com.prohor.personal.bobaFettBot.data.mapping.Entity;
+import com.prohor.personal.bobaFettBot.data.mapping.EntityField;
+import com.prohor.personal.bobaFettBot.data.mapping.MappingException;
+import com.prohor.personal.bobaFettBot.data.mapping.PrimaryKey;
+import com.prohor.personal.bobaFettBot.data.mapping.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.*;
-import java.sql.*;
-import java.time.*;
-import java.util.*;
-import java.util.stream.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class PostgresCRUDMapper {
     private static final Logger log = LoggerFactory.getLogger(PostgresCRUDMapper.class);
 
     public static <T extends Entity> boolean contains(Connection connection, Class<T> clazz, Object primaryKey)
-            throws SQLException {
+            throws SQLException
+    {
         String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(clazz) + " WHERE " +
                 getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             return resultSet.next() && resultSet.getInt(1) == 1;
         }
     }
@@ -25,13 +42,15 @@ public class PostgresCRUDMapper {
     public static <T extends Entity> boolean containsByFields(Connection connection, T entity) throws SQLException {
         String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             return resultSet.next() && resultSet.getInt(1) > 0;
         }
     }
 
     public static <T extends Entity> void delete(Connection connection, Class<T> clazz, Object primaryKey)
-            throws SQLException {
+            throws SQLException
+    {
         try (Statement statement = connection.createStatement()) {
             String sql = "DELETE FROM " + getTableName(clazz) + " WHERE " +
                     getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
@@ -39,13 +58,14 @@ public class PostgresCRUDMapper {
         }
     }
 
-
     public static <T extends Entity> T get(Connection connection, Class<T> clazz, Object primaryKey)
-            throws SQLException {
+            throws SQLException
+    {
         String sqlQuery = "SELECT * FROM " + getTableName(clazz) + " WHERE " +
                 getPrimaryKeyColumnName(clazz) + " = " + wrapObject(primaryKey) + ";";
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             if (resultSet.next())
                 return createEntityFromResultSet(clazz, resultSet);
             throw new MappingException("entity with specified primary key does not exist");
@@ -58,7 +78,8 @@ public class PostgresCRUDMapper {
         String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
 
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             if (resultSet.next())
                 t = (T) createEntityFromResultSet(entity.getClass(), resultSet);
             else
@@ -74,7 +95,8 @@ public class PostgresCRUDMapper {
         String sqlQuery = "SELECT * FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
 
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             while (resultSet.next())
                 list.add((T) createEntityFromResultSet(entity.getClass(), resultSet));
         }
@@ -82,11 +104,13 @@ public class PostgresCRUDMapper {
     }
 
     public static <T extends Entity> List<T> getAll(Connection connection, Class<T> clazz)
-            throws SQLException {
+            throws SQLException
+    {
         List<T> entities = new ArrayList<>();
         String sqlQuery = "SELECT * FROM " + getTableName(clazz) + ";";
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             while (resultSet.next()) {
                 entities.add(createEntityFromResultSet(clazz, resultSet));
             }
@@ -97,7 +121,8 @@ public class PostgresCRUDMapper {
     public static <T extends Entity> int countByFields(Connection connection, T entity) throws SQLException {
         String sqlQuery = "SELECT COUNT(*) FROM " + getTableName(entity.getClass()) + getConditionByFields(entity);
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = executeSQLQuery(statement, sqlQuery)) {
+             ResultSet resultSet = executeSQLQuery(statement, sqlQuery))
+        {
             if (resultSet.next())
                 return resultSet.getInt(1);
         }
@@ -266,8 +291,8 @@ public class PostgresCRUDMapper {
     }
 
     private static <T extends Entity> T createEntityFromResultSet(Class<T> clazz, ResultSet resultSet)
-            throws SQLException {
-
+            throws SQLException
+    {
         T entity;
         try {
             entity = clazz.getDeclaredConstructor().newInstance();

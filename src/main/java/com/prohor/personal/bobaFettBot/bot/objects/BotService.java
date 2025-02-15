@@ -1,6 +1,9 @@
 package com.prohor.personal.bobaFettBot.bot.objects;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BotService<Identifier, Task extends Identifiable<Identifier>> {
     private final Map<Identifier, Task> map = new HashMap<>();

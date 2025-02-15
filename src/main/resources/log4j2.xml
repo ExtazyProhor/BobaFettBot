@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Properties>
-        <Property name="MainPattern">%d{yyyy-MM-dd HH:mm:ss}{Europe/Moscow} %-5p %c{1}:%L - %m%n</Property>
-        <Property name="ColorPattern">%d{yyyy-MM-dd HH:mm:ss}{Europe/Moscow} %highlight{%-5p} %c{1}:%L - %m%n</Property>
+        <Property name="MainPattern">%d{yyyy-MM-dd HH:mm:ss}{Europe/Moscow} %-5p %c{1}:%L - %m%n%ex{full}</Property>
+        <Property name="ColorPattern">%d{yyyy-MM-dd HH:mm:ss}{Europe/Moscow} %highlight{%-5p} %c{1}:%L - %m%n%ex{full}</Property>
     </Properties>
 
     <Appenders>
