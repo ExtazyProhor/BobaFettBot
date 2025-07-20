@@ -25,13 +25,12 @@ import com.prohor.personal.bobaFettBot.features.holidays.commands.HolidaysComman
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitCustomHolidayName;
 import com.prohor.personal.bobaFettBot.features.holidays.statuses.WaitImportChatId;
 import com.prohor.personal.bobaFettBot.util.AdminUtils;
-import org.json.JSONObject;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.List;
+import java.util.Properties;
 
 public class Main {
     static {
@@ -44,33 +43,28 @@ public class Main {
     }
 
     public static void main(String[] args) {
+
         String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         File directory = path.contains(".jar") ?
                 new File(path).getParentFile() :
                 new File("files/private");
-
         try {
-            JSONObject tokens = new JSONObject(Files.readString(Paths.get(directory.toURI()).resolve("tokens.json")));
-            JSONObject botTokens = tokens.getJSONObject("bot-info");
-            JSONObject databaseTokens = tokens.getJSONObject("database-info");
-            tokens.getJSONObject("admins-info").getJSONArray("admins-ids").forEach(id -> {
-                if (id instanceof Long l)
-                    AdminUtils.addAdmin(l);
-                else if (id instanceof Integer i)
-                    AdminUtils.addAdmin(i);
-            });
+            Properties properties = new Properties();
+            properties.load(Main.class.getClassLoader().getResourceAsStream("application.properties"));
+            List.of(properties.getProperty("admin.admins-ids").split(",")).forEach(
+                    id -> AdminUtils.addAdmin(Long.parseLong(id))
+            );
 
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             Bot bot = new Bot(
-                    botTokens.getString("token"),
-                    botTokens.getString("username"),
+                    properties.getProperty("bot.token"),
+                    properties.getProperty("bot.username"),
                     new BotService<>(
                             new StartCommand(),
                             new CommandsList(),
                             new CancelCommand(),
                             new GetIdCommand(),
                             new NotifyCommand(),
-
                             new HolidaysCommand()),
                     new BotPrefixService<>(
                             ChooseCustomHolidayDateCallback.getInstance(),
@@ -86,14 +80,13 @@ public class Main {
                             WaitCustomHolidayName.getInstance(),
                             WaitImportChatId.getInstance()),
                     new PostgresDataStorage(
-                            databaseTokens.getString("url"),
-                            databaseTokens.getString("username"),
-                            databaseTokens.getString("password")));
+                            properties.getProperty("database.url"),
+                            properties.getProperty("database.username"),
+                            properties.getProperty("database.password")));
             telegramBotsApi.registerBot(bot);
 
             Holidays.init(directory);
             new Distributor(bot, new HolidaysDistributor());
-
         } catch (Exception e) {
             e.printStackTrace();
         }

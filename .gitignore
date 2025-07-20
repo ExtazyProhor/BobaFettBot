@@ -7,3 +7,4 @@ target/
 
 /files/private/
 /logs/
+application.properties
